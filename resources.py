@@ -12,7 +12,44 @@ class HelloWorld(Resource):
         return {'hello': 'world'}, 200
 
 
-class UserRegistration(Resource):
+class UserCreate(Resource):
     def post(self):
-        data = parser.parse_args()
-        print(data)
+        pass
+
+
+class UserLogin(Resource):
+    def post(self):
+        pass
+
+
+class UserData(Resource):
+    @jwt_required
+    def get(self, user_id):
+        pass
+    
+    @jwt_required
+    def patch(self, user_id):
+        pass
+
+    @jwt_required
+    def delete(self, user_id):
+        pass
+
+
+class RecipeCreate(Resource):
+    @jwt_required
+    def post(self):
+        pass
+
+class RecipeData(Resource):
+    @jwt_required
+    def get(self, recipe_id):
+        pass
+
+    @jwt_required
+    def patch(self, user_id):
+        pass
+
+    @jwt_required
+    def delete(self, user_id):
+        pass

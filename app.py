@@ -21,12 +21,13 @@ def create_tables():
 import resources, models
 
 
-api.add_resource(resources.HelloWorld, '/hello')
-api.add_resource(resources.UserCreate, '/register')
-api.add_resource(resources.UserLogin, '/login')
-api.add_resource(resources.UserData, '/user/<int:user_id>')
-api.add_resource(resources.RecipeCreate, '/recipe')
-api.add_resource(resources.RecipeData, '/recipe/<int:recipe_id>')
+api.add_resource(resources.HelloWorld,      '/hello')
+api.add_resource(resources.AccountRegister, '/account/register')
+api.add_resource(resources.AccountLogin,    '/account/login')
+api.add_resource(resources.AccountDelete,   '/account/delete')
+api.add_resource(resources.UserData,        '/users/<int:user_id>')
+api.add_resource(resources.RecipeCreate,    '/recipes')
+api.add_resource(resources.RecipeData,      '/recipes/<int:recipe_id>')
 
 
 if __name__ == "__main__":

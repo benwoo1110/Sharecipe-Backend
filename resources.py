@@ -16,6 +16,9 @@ class AccountRegister(Resource):
     def post(self):
         data = parser.parse_args()
 
+        if User.get_by_username(data['username']):
+            return {'error': 'Username already exist.'}, 400
+
         user = User(username=data['username'],  password_hash=User.hash_password(data['password']))
         user.add_to_db()
 

@@ -37,7 +37,7 @@ class AccountLogin(Resource):
         data = parser.parse_args()
         user = User.get_by_username(data['username'])
         if not user:
-            return {'error': 'Username not found.'}, 404
+            return {'error': 'Invalid username.'}, 404
 
         if not user.verify_password(data['password']):
             return {'error': 'Invalid password.'}, 403
@@ -58,7 +58,7 @@ class AccountDelete(Resource):
         user_id = get_jwt_identity()
         user = User.get_by_id(user_id)
         if not user:
-            return {'error': 'Username not found.'}, 404
+            return {'error': 'User not found.'}, 404
 
         user.remove_from_db()
         return 200
@@ -67,8 +67,15 @@ class AccountDelete(Resource):
 class UserData(Resource):
     @jwt_required()
     def get(self, user_id):
-        pass
+        user = User.get_by_id(user_id)
+        if not user:
+            return {'error': 'User not found.'}, 404
     
+        return {
+            'username': user.username,
+            'bio': user.bio
+        }
+
     @jwt_required()
     def patch(self, user_id):
         pass

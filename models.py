@@ -29,6 +29,10 @@ class User(db.Model):
     def get_by_username(cls, username):
         return cls.query.filter_by(username = username).first()
 
+    @classmethod
+    def search_username(cls, username):
+        return cls.query.filter(cls.username.startswith(username)).all()
+
     @staticmethod
     def hash_password(password):
         return sha256.hash(password)

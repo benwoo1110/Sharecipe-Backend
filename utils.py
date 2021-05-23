@@ -2,6 +2,13 @@ from typing import Any
 from flask_restful import request, abort
 
 
+def obj_to_dict(obj, *fields):
+    data = {}
+    for field in fields:
+        data[field] = getattr(obj, field, None)
+    return data
+
+
 class JsonParser:
     def __init__(self, allow_empty_data=False):
         self.checks = {}

@@ -1,7 +1,7 @@
-from flask_restful import Resource, abort
+from flask_restful import Resource, abort, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
 from models import User, Recipe
-from utils import JsonParser
+from utils import JsonParser, obj_to_dict
 
 
 parser = JsonParser()
@@ -63,6 +63,22 @@ class AccountDelete(Resource):
         return 200
 
 
+class UserSearch(Resource):
+    @jwt_required()
+    def get(self):
+        username = request.args.get('username', '')
+        users = User.search_username(username)
+
+        if not users:
+            abort(404, message='User not found.')
+
+        data = {}
+        for user in users:
+            data[user.user_id] = obj_to_dict(user, 'username', 'bio')
+
+        return data, 200
+
+
 class UserData(Resource):
     @jwt_required()
     def get(self, user_id):
@@ -70,10 +86,7 @@ class UserData(Resource):
         if not user:
             abort(404, message='User not found.')
     
-        return {
-            'username': user.username,
-            'bio': user.bio
-        }
+        return obj_to_dict(user, 'username', 'bio'), 200
 
     @jwt_required()
     def patch(self, user_id):

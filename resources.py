@@ -1,10 +1,12 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, abort
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
 from models import User, Recipe
+from utils import JsonParser
 
-parser = reqparse.RequestParser()
-parser.add_argument('username', help = 'This field cannot be blank', required = True)
-parser.add_argument('password', help = 'This field cannot be blank', required = True)
+
+parser = JsonParser()
+parser.add_arg('username')
+parser.add_arg('password')
 
 
 class HelloWorld(Resource):
@@ -17,7 +19,7 @@ class AccountRegister(Resource):
         data = parser.parse_args()
 
         if User.get_by_username(data['username']):
-            return {'error': 'Username already exist.'}, 400
+            abort(400, message='Username already exist.')
 
         user = User(username=data['username'],  password_hash=User.hash_password(data['password']))
         user.add_to_db()
@@ -36,11 +38,8 @@ class AccountLogin(Resource):
     def post(self):
         data = parser.parse_args()
         user = User.get_by_username(data['username'])
-        if not user:
-            return {'error': 'Invalid username.'}, 404
-
-        if not user.verify_password(data['password']):
-            return {'error': 'Invalid password.'}, 403
+        if not user or not user.verify_password(data['password']):
+            abort(404, message='Invalid username or password.')
 
         access_token = create_access_token(identity=user.user_id)
         refresh_token = create_refresh_token(identity=user.user_id)
@@ -58,7 +57,7 @@ class AccountDelete(Resource):
         user_id = get_jwt_identity()
         user = User.get_by_id(user_id)
         if not user:
-            return {'error': 'User not found.'}, 404
+            abort(404, message='User not found.')
 
         user.remove_from_db()
         return 200
@@ -69,7 +68,7 @@ class UserData(Resource):
     def get(self, user_id):
         user = User.get_by_id(user_id)
         if not user:
-            return {'error': 'User not found.'}, 404
+            abort(404, message='User not found.')
     
         return {
             'username': user.username,

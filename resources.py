@@ -72,9 +72,9 @@ class UserSearch(Resource):
         if not users:
             abort(404, message='User not found.')
 
-        data = {}
+        data = []
         for user in users:
-            data[user.user_id] = obj_to_dict(user, 'username', 'bio')
+            data = obj_to_dict(user, 'user_id', 'username', 'bio')
 
         return data, 200
 
@@ -86,7 +86,7 @@ class UserData(Resource):
         if not user:
             abort(404, message='User not found.')
     
-        return obj_to_dict(user, 'username', 'bio'), 200
+        return obj_to_dict(user, 'user_id', 'username', 'bio'), 200
 
     @jwt_required()
     def patch(self, user_id):

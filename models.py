@@ -1,3 +1,4 @@
+from datetime import datetime
 from app import db
 from passlib.hash import pbkdf2_sha256 as sha256
 
@@ -9,8 +10,10 @@ class User(db.Model):
     username = db.Column(db.String(128), unique = True, nullable = False)
     password_hash = db.Column(db.String(128), nullable = False)
     bio = db.Column(db.String(512), nullable = True)
+    time_created = db.Column(db.DateTime())
 
     def add_to_db(self):
+        self.time_created = datetime.now()
         db.session.add(self)
         db.session.commit()
 

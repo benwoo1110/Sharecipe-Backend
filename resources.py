@@ -86,7 +86,7 @@ class UserSearch(Resource):
 
         data = []
         for user in users:
-            data = obj_to_dict(user, 'user_id', 'username', 'bio')
+            data.append(obj_to_dict(user, 'user_id', 'username', 'bio'))
 
         return data, 200
 

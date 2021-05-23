@@ -10,5 +10,3 @@ SQLALCHEMY_DATABASE_URI = environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///app.
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SECRET_KEY = environ.get('SECRET_KEY', 'some-secret-string')
 JWT_SECRET_KEY = environ.get('JWT_SECRET_KEY', 'jwt-secret-string')
-JWT_BLACKLIST_ENABLED = True
-JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']

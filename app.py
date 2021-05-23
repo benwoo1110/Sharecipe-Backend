@@ -18,12 +18,19 @@ def create_tables():
     db.create_all()
 
 
+@jwt.token_in_blocklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token['jti']
+    return models.RevokedTokenModel.is_jti_blacklisted(jti)
+
+
 import resources, models
 
 
 api.add_resource(resources.HelloWorld,      '/hello')
 api.add_resource(resources.AccountRegister, '/account/register')
 api.add_resource(resources.AccountLogin,    '/account/login')
+api.add_resource(resources.AccountRefresh,  '/account/refresh')
 api.add_resource(resources.AccountDelete,   '/account/delete')
 api.add_resource(resources.UserSearch,      '/users')
 api.add_resource(resources.UserData,        '/users/<int:user_id>')

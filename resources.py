@@ -51,8 +51,20 @@ class AccountLogin(Resource):
         }
 
 
+class AccountRefresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        user_id = get_jwt_identity()
+        user = User.get_by_id(user_id)
+        if not user:
+            abort(404, message='User not found.')
+
+        access_token = create_access_token(identity=user_id)
+        return {'access_token': access_token}
+
+
 class AccountDelete(Resource):
-    @jwt_required()
+    @jwt_required(refresh=True)
     def delete(self):
         user_id = get_jwt_identity()
         user = User.get_by_id(user_id)
@@ -60,7 +72,7 @@ class AccountDelete(Resource):
             abort(404, message='User not found.')
 
         user.remove_from_db()
-        return 200
+        return 204
 
 
 class UserSearch(Resource):

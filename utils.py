@@ -1,5 +1,6 @@
-from typing import Any
-from flask_restful import request, abort
+from flask import jsonify
+from flask_restful import request, abort, Api
+from jwt.exceptions import ExpiredSignatureError
 
 
 def obj_to_dict(obj, *fields):
@@ -33,3 +34,10 @@ class JsonParser:
                 abort(400, message=str(e))
 
         return data
+
+
+class ApiHandler(Api):
+    def error_router(self, original_handler, e):
+        if self._has_fr_route() and isinstance(e, ExpiredSignatureError):
+            return jsonify({'message': 'Access token expired!'}), 400
+        return original_handler(e)

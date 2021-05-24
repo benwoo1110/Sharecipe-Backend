@@ -1,14 +1,14 @@
 from flask import Flask
-from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+from utils import ApiHandler
 
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 
-api = Api(app)
+api = ApiHandler(app)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 

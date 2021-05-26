@@ -17,7 +17,7 @@ class JsonParser:
 
     def add_arg(self, name:str, required=True):
         def check(value):
-            if not (value and required):
+            if required and not value:
                 raise ValueError(f'{name} must not be empty!')
             return value
         self.checks[name] = check

@@ -7,6 +7,7 @@ from utils import JsonParser, obj_to_dict
 account_parser = JsonParser()
 account_parser.add_arg('username')
 account_parser.add_arg('password')
+account_parser.add_arg('bio', required=False)
 
 
 user_parser = JsonParser()
@@ -22,11 +23,13 @@ class HelloWorld(Resource):
 class AccountRegister(Resource):
     def post(self):
         data = account_parser.parse_args()
-
         if User.get_by_username(data['username']):
             return {'message': 'Username already exist.'}, 400
 
-        user = User(username=data['username'],  password_hash=User.hash_password(data['password']))
+        password = data.pop('password')
+        password_hash = User.hash_password(password)
+
+        user = User(password_hash=password_hash, **data)
         user.add_to_db()
 
         access_token = create_access_token(identity=user.user_id)
@@ -138,7 +141,7 @@ class UserRecipe(Resource):
         pass
 
     @jwt_required()
-    def post(self, user_id):
+    def put(self, user_id):
         pass
 
 

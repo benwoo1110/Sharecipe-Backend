@@ -10,7 +10,7 @@ class User(db.Model):
     username = db.Column(db.String(128), unique = True, nullable = False)
     password_hash = db.Column(db.String(128), nullable = False)
     bio = db.Column(db.String(512), nullable = True)
-    time_created = db.Column(db.DateTime())
+    time_created = db.Column(db.DateTime(), nullable = False)
 
     def add_to_db(self):
         self.time_created = datetime.now()

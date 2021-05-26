@@ -19,21 +19,26 @@ class JsonParser:
         def check(value):
             if not (value and required):
                 raise ValueError(f'{name} must not be empty!')
+            return value
         self.checks[name] = check
 
     def parse_args(self):
         data = request.get_json() or {}
+        parsed_data = {}
         if not data:
             if not self.allow_empty_data:
                 abort(400, message='No data received!')
 
         for arg, check in self.checks.items():
+            value = data.get(arg, None)
             try:
-                check(data.get(arg, None))
+                value = check(value)
             except Exception as e:
                 abort(400, message=str(e))
+            else:
+                parsed_data[arg] = value
 
-        return data
+        return parsed_data
 
 
 class ApiHandler(Api):

@@ -17,8 +17,8 @@ class Account:
         response = requests.delete(f'{URL}/account/delete', headers=header)
 
     @classmethod
-    def add(cls, username, password):
-        payload = {'username': username, 'password': password}
+    def add(cls, username, password, bio=None):
+        payload = {'username': username, 'password': password, 'bio': bio}
         response = requests.post(f'{URL}/account/register', json=payload)
         return cls(**response.json())
 
@@ -26,7 +26,7 @@ class Account:
 class TestAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.a1 = Account.add('testing123', '123456')
+        cls.a1 = Account.add('testing123', '123456', 'A human!')
         cls.a2 = Account.add('testing456', '123456')
         cls.a3 = Account.add('admin123', '123456')
 
@@ -46,7 +46,7 @@ class TestAPI(unittest.TestCase):
         response = requests.get(f'{URL}/users', headers=header)
         data = response.json()
         self.assertListEqual(data, [
-            {'user_id': self.a1.user_id, 'username': 'testing123', 'bio': None}, 
+            {'user_id': self.a1.user_id, 'username': 'testing123', 'bio': 'A human!'}, 
             {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None}, 
             {'user_id': self.a3.user_id, 'username': 'admin123', 'bio': None}
         ])
@@ -57,7 +57,7 @@ class TestAPI(unittest.TestCase):
         data = response.json()
         self.assertIsInstance(data, list)
         self.assertListEqual(data, [
-            {'user_id': self.a1.user_id, 'username': 'testing123', 'bio': None}, 
+            {'user_id': self.a1.user_id, 'username': 'testing123', 'bio': 'A human!'}, 
             {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None}
         ])
 

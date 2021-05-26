@@ -119,6 +119,10 @@ class UserData(Resource):
 
     @jwt_required()
     def patch(self, user_id):
+        account_user_id = get_jwt_identity()
+        if account_user_id != user_id:
+            return {'message': 'You can only modify your own user data!'}, 403
+
         data = user_parser.parse_args()
         user = User.get_by_id(user_id)
         if not user:

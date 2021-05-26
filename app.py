@@ -27,15 +27,18 @@ def check_if_token_in_blacklist(jwt_header, jwt_data):
 import resources, models
 
 
-api.add_resource(resources.HelloWorld,      '/hello')
-api.add_resource(resources.AccountRegister, '/account/register')
-api.add_resource(resources.AccountLogin,    '/account/login')
-api.add_resource(resources.AccountRefresh,  '/account/refresh')
-api.add_resource(resources.AccountDelete,   '/account/delete')
-api.add_resource(resources.UserSearch,      '/users')
-api.add_resource(resources.UserData,        '/users/<int:user_id>')
-api.add_resource(resources.RecipeCreate,    '/recipes')
-api.add_resource(resources.RecipeData,      '/recipes/<int:recipe_id>')
+api.add_resource(resources.HelloWorld,      '/hello') # GET
+
+api.add_resource(resources.AccountRegister, '/account/register') # POST
+api.add_resource(resources.AccountLogin,    '/account/login') # POST
+api.add_resource(resources.AccountRefresh,  '/account/refresh') # POST
+api.add_resource(resources.AccountLogout,   '/account/logout') # POST
+api.add_resource(resources.AccountDelete,   '/account/delete') # POST
+
+api.add_resource(resources.UserSearch,      '/users') # GET
+api.add_resource(resources.UserData,        '/users/<int:user_id>') # GET PATCH
+api.add_resource(resources.UserRecipe,      '/users/<int:user_id>/recipes') # GET PUT
+api.add_resource(resources.UserRecipeData,  '/users/<int:user_id>/recipes/<int:recipe_id>') # GET PATCH DELETE
 
 
 if __name__ == "__main__":

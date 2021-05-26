@@ -1,6 +1,6 @@
 from flask_restful import Resource, request
-from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity
-from models import User, Recipe
+from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
+from models import User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 
 
@@ -63,6 +63,18 @@ class AccountRefresh(Resource):
         return {'access_token': access_token}
 
 
+class AccountLogout(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        jti = get_jwt()['jti']
+        try:
+            revoked_token = RevokedToken(jti = jti)
+            revoked_token.add()
+            return {'message': 'Access token has been revoked'}
+        except:
+            return {'message': 'Something went wrong'}, 500
+
+
 class AccountDelete(Resource):
     @jwt_required(refresh=True)
     def delete(self):
@@ -105,20 +117,25 @@ class UserData(Resource):
         pass
 
 
-class RecipeCreate(Resource):
+class UserRecipe(Resource):
     @jwt_required()
-    def post(self):
-        pass
-
-class RecipeData(Resource):
-    @jwt_required()
-    def get(self, recipe_id):
+    def get(self, user_id):
         pass
 
     @jwt_required()
-    def patch(self, user_id):
+    def post(self, user_id):
+        pass
+
+
+class UserRecipeData(Resource):
+    @jwt_required()
+    def get(self, user_id, recipe_id):
+        pass
+
+    @jwt_required()
+    def patch(self, user_id, recipe_id):
         pass
 
     @jwt_required
-    def delete(self, user_id):
+    def delete(self, user_id, recipe_id):
         pass

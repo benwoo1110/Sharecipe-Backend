@@ -75,6 +75,13 @@ class TestAPI(unittest.TestCase):
         data = response.json()
         self.assertDictEqual(data, {'user_id': self.a3.user_id, 'username': 'totallyNotAdmin', 'bio': 'Code. Create. Coordinate.'})
 
+    def test_create_new_recipe(self):
+        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        payload = {'name': 'Edible food', 'steps': [{'step_number': 1, 'description': 'Add water.'}, {'step_number': 2, 'description': 'Add egg.'}]}
+        response = requests.put(f'{URL}/users/{self.a3.user_id}/recipes', headers=header, json=payload)
+        data = response.json()
+        print(data)
+
     @classmethod
     def tearDownClass(cls):
         cls.a1.delete()

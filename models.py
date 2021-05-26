@@ -50,10 +50,18 @@ class Recipe(db.Model):
     __tablename__ = 'recipes'
 
     recipe_id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     name = db.Column(db.String(128), nullable = False)
     portion = db.Column(db.Integer, nullable = True)
+    difficulty = db.Column(db.Integer, nullable = True)
     total_time_needed = db.Column(db.Integer, nullable = True)
+    time_created = db.Column(db.DateTime(), nullable = False)
     steps = db.relationship('RecipeStep', backref='recipe', lazy=True)
+
+    def add_to_db(self):
+        self.time_created = datetime.now()
+        db.session.add(self)
+        db.session.commit()
 
 
 class RecipeStep(db.Model):
@@ -61,7 +69,7 @@ class RecipeStep(db.Model):
 
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'), primary_key = True)
     step_number = db.Column(db.Integer, primary_key = True)
-    description = db.Column(db.String(1024), primary_key = True)
+    description = db.Column(db.String(1024), nullable = True)
     time_needed = db.Column(db.Integer, nullable = True)
 
 

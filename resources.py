@@ -1,6 +1,6 @@
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
-from models import User, Recipe, RevokedToken
+from models import RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 
 
@@ -13,6 +13,14 @@ account_parser.add_arg('bio', required=False)
 user_parser = JsonParser()
 user_parser.add_arg('username')
 user_parser.add_arg('bio')
+
+
+recipe_parser = JsonParser()
+recipe_parser.add_arg('name')
+recipe_parser.add_arg('portion', required=False)
+recipe_parser.add_arg('difficulty', required=False)
+recipe_parser.add_arg('total_time_needed', required=False)
+recipe_parser.add_arg('steps', required=False)
 
 
 class HelloWorld(Resource):
@@ -142,7 +150,21 @@ class UserRecipe(Resource):
 
     @jwt_required()
     def put(self, user_id):
-        pass
+        account_user_id = get_jwt_identity()
+        if account_user_id != user_id:
+            return {'message': 'You can only modify your own user data!'}, 403
+
+        data = recipe_parser.parse_args()
+        if data.get('steps'):
+            steps = []
+            for step_data in data.get('steps'):
+                steps.append(RecipeStep(**step_data))
+            data['steps'] = steps
+
+        recipe = Recipe(user_id=user_id, **data)
+        recipe.add_to_db()
+
+        return obj_to_dict(recipe, 'recipe_id', 'user_id', 'name', 'portion', 'difficulty', 'total_time_needed'), 200
 
 
 class UserRecipeData(Resource):

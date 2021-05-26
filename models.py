@@ -47,6 +47,7 @@ class Recipe(db.Model):
     name = db.Column(db.String(128), nullable = False)
     portion = db.Column(db.Integer, nullable = True)
     total_time_needed = db.Column(db.Integer, nullable = True)
+    steps = db.relationship('RecipeStep', backref='recipe', lazy=True)
 
 
 class RecipeStep(db.Model):

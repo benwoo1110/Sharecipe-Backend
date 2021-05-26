@@ -21,7 +21,7 @@ def create_tables():
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blacklist(jwt_header, jwt_data):
     jti = jwt_data['jti']
-    return models.RevokedTokenModel.is_jti_blacklisted(jti)
+    return models.RevokedToken.is_jti_blacklisted(jti)
 
 
 import resources, models

@@ -6,16 +6,29 @@ use_production = False
 URL = 'https://sharecipe-backend.herokuapp.com' if use_production else 'http://127.0.0.1:5000'
 
 
+class Account:
+    def __init__(self, user_id, access_token, refresh_token):
+        self.user_id = user_id
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+
+    def delete(self):
+        header = {'Authorization': f'Bearer {self.refresh_token}'}
+        response = requests.delete(f'{URL}/account/delete', headers=header)
+
+    @classmethod
+    def add(cls, username, password):
+        payload = {'username': username, 'password': password}
+        response = requests.post(f'{URL}/account/register', json=payload)
+        return cls(**response.json())
+
+
 class TestAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        payload = {'username': 'testing123', 'password': '123456'}
-        response = requests.post(f'{URL}/account/register', json=payload)
-        data = response.json()
-        print(data)
-        cls.user_id = data['user_id']
-        cls.access_token = data['access_token']
-        cls.refresh_token = data['refresh_token']
+        cls.a1 = Account.add('testing123', '123456')
+        cls.a2 = Account.add('testing456', '123456')
+        cls.a3 = Account.add('admin123', '123456')
 
     def test_hello_world(self):
         response = requests.get(f'{URL}/hello')
@@ -26,12 +39,40 @@ class TestAPI(unittest.TestCase):
         payload = {'username': 'testing123', 'password': '123456'}
         response = requests.post(f'{URL}/account/login', json=payload)
         data = response.json()
-        print(data)
+        self.assertEqual(self.a1.user_id, data.get('user_id'))
+
+    def test_user_search(self):
+        header = {'Authorization': f'Bearer {self.a1.access_token}'}
+        response = requests.get(f'{URL}/users', headers=header)
+        data = response.json()
+        self.assertListEqual(data, [
+            {'user_id': self.a1.user_id, 'username': 'testing123', 'bio': None}, 
+            {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None}, 
+            {'user_id': self.a3.user_id, 'username': 'admin123', 'bio': None}
+        ])
+
+    def test_user_search_with_query(self):
+        header = {'Authorization': f'Bearer {self.a1.access_token}'}
+        response = requests.get(f'{URL}/users?username=test', headers=header)
+        data = response.json()
+        self.assertIsInstance(data, list)
+        self.assertListEqual(data, [
+            {'user_id': self.a1.user_id, 'username': 'testing123', 'bio': None}, 
+            {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None}
+        ])
+
+    def test_user_get_data(self):
+        header = {'Authorization': f'Bearer {self.a1.access_token}'}
+        response = requests.get(f'{URL}/users/{self.a2.user_id}', headers=header)
+        data = response.json()
+        self.assertIsInstance(data, dict)
+        self.assertDictEqual(data, {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None})
 
     @classmethod
     def tearDownClass(cls):
-        header = {'Authorization': f'Bearer {cls.access_token}'}
-        response = requests.delete(f'{URL}/account/delete', headers=header)
+        cls.a1.delete()
+        cls.a2.delete()
+        cls.a3.delete()
 
 
 if __name__ == '__main__':

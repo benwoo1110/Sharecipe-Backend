@@ -88,7 +88,7 @@ class AccountDelete(Resource):
 
 
 class UserSearch(Resource):
-    #@jwt_required()
+    @jwt_required()
     def get(self):
         username = request.args.get('username', '')
         users = User.search_username(username)

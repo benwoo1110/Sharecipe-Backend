@@ -4,9 +4,14 @@ from models import User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 
 
-parser = JsonParser()
-parser.add_arg('username')
-parser.add_arg('password')
+account_parser = JsonParser()
+account_parser.add_arg('username')
+account_parser.add_arg('password')
+
+
+user_parser = JsonParser()
+user_parser.add_arg('username')
+user_parser.add_arg('bio')
 
 
 class HelloWorld(Resource):
@@ -16,7 +21,7 @@ class HelloWorld(Resource):
 
 class AccountRegister(Resource):
     def post(self):
-        data = parser.parse_args()
+        data = account_parser.parse_args()
 
         if User.get_by_username(data['username']):
             return {'message': 'Username already exist.'}, 400
@@ -36,7 +41,7 @@ class AccountRegister(Resource):
 
 class AccountLogin(Resource):
     def post(self):
-        data = parser.parse_args()
+        data = account_parser.parse_args()
         user = User.get_by_username(data['username'])
         if not user or not user.verify_password(data['password']):
             return {'message': 'Invalid username or password.'}, 400
@@ -114,7 +119,13 @@ class UserData(Resource):
 
     @jwt_required()
     def patch(self, user_id):
-        pass
+        data = user_parser.parse_args()
+        user = User.get_by_id(user_id)
+        if not user:
+            return {'message': 'User not found.'}, 404
+
+        user.update(**data)
+        return obj_to_dict(user, 'user_id', 'username', 'bio'), 200
 
 
 class UserRecipe(Resource):

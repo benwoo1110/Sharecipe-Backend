@@ -21,6 +21,12 @@ class User(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def update(self, **kwargs):
+        for attr, data in kwargs.items():
+            if hasattr(self, attr):
+                setattr(self, attr, data)
+        db.session.commit()
+
     def verify_password(self, password) -> bool:
         return sha256.verify(password, self.password_hash)
 

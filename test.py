@@ -68,6 +68,13 @@ class TestAPI(unittest.TestCase):
         self.assertIsInstance(data, dict)
         self.assertDictEqual(data, {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None})
 
+    def test_user_update_data(self):
+        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        payload = {'username': 'totallyNotAdmin', 'bio': 'Code. Create. Coordinate.'}
+        response = requests.patch(f'{URL}/users/{self.a3.user_id}', headers=header, json=payload)
+        data = response.json()
+        self.assertDictEqual(data, {'user_id': self.a3.user_id, 'username': 'totallyNotAdmin', 'bio': 'Code. Create. Coordinate.'})
+
     @classmethod
     def tearDownClass(cls):
         cls.a1.delete()

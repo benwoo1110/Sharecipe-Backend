@@ -4,8 +4,13 @@ from passlib.hash import pbkdf2_sha256 as sha256
 from dataclasses import dataclass
 
 
+@dataclass
 class User(db.Model):
     __tablename__ = 'users'
+
+    user_id: int
+    username: str
+    bio: str
 
     user_id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(128), unique = True, nullable = False)
@@ -67,7 +72,7 @@ class Recipe(db.Model):
     difficulty = db.Column(db.Integer, nullable = True)
     total_time_needed = db.Column(db.Integer, nullable = True)
     time_created = db.Column(db.DateTime(), nullable = False)
-    steps = db.relationship('RecipeStep', backref='recipe', lazy=True)
+    steps = db.relationship('RecipeStep', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
 
     def add_to_db(self):
         self.time_created = datetime.now()

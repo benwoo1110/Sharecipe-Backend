@@ -29,6 +29,7 @@ class TestAPI(unittest.TestCase):
         cls.a1 = Account.add('testing123', '123456', 'A human!')
         cls.a2 = Account.add('testing456', '123456')
         cls.a3 = Account.add('admin123', '123456')
+        cls.maxDiff = None
 
     def test_hello_world(self):
         response = requests.get(f'{URL}/hello')
@@ -77,10 +78,23 @@ class TestAPI(unittest.TestCase):
 
     def test_create_new_recipe(self):
         header = {'Authorization': f'Bearer {self.a3.access_token}'}
-        payload = {'name': 'Edible food', 'steps': [{'step_number': 1, 'description': 'Add water.'}, {'step_number': 2, 'description': 'Add egg.'}]}
+        payload = {'name': 'Edible food', 'steps': [{'step_number': 1, 'name': 'a', 'description': 'Add water.'}, {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}]}
         response = requests.put(f'{URL}/users/{self.a3.user_id}/recipes', headers=header, json=payload)
         data = response.json()
-        print(data)
+        TestAPI.test_recipe = data
+
+    def test_data_get_recipe(self):
+        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        response = requests.get(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
+        data = response.json()
+        self.assertDictEqual(data, TestAPI.test_recipe)
+
+    def test_delete_recipe(self):
+        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        response = requests.delete(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
+        self.assertEqual(response.status_code, 204)
+        response = requests.get(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
+        self.assertEqual(response.status_code, 404)
 
     @classmethod
     def tearDownClass(cls):

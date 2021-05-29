@@ -1,6 +1,7 @@
 from datetime import datetime
 from app import db
 from passlib.hash import pbkdf2_sha256 as sha256
+from dataclasses import dataclass
 
 
 class User(db.Model):
@@ -46,8 +47,18 @@ class User(db.Model):
     def hash_password(password):
         return sha256.hash(password)
 
+@dataclass
 class Recipe(db.Model):
     __tablename__ = 'recipes'
+
+    recipe_id: int
+    user_id: int
+    name: str
+    portion: int
+    difficulty: int
+    total_time_needed: int
+    time_created: datetime
+    steps: list
 
     recipe_id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
@@ -64,11 +75,19 @@ class Recipe(db.Model):
         db.session.commit()
 
 
+@dataclass
 class RecipeStep(db.Model):
     __tablename__ = 'recipe_steps'
 
+    recipe_id: int
+    step_number: int
+    name: str
+    description: str
+    time_needed: int
+
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'), primary_key = True)
     step_number = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.Integer, nullable = True)
     description = db.Column(db.String(1024), nullable = True)
     time_needed = db.Column(db.Integer, nullable = True)
 

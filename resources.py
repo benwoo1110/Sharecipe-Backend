@@ -1,3 +1,4 @@
+from flask import jsonify, make_response
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
 from models import RecipeStep, User, Recipe, RevokedToken
@@ -164,7 +165,7 @@ class UserRecipe(Resource):
         recipe = Recipe(user_id=user_id, **data)
         recipe.add_to_db()
 
-        return obj_to_dict(recipe, 'recipe_id', 'user_id', 'name', 'portion', 'difficulty', 'total_time_needed'), 200
+        return make_response(jsonify(recipe), 201)
 
 
 class UserRecipeData(Resource):

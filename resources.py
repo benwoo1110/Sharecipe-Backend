@@ -183,4 +183,9 @@ class UserRecipeData(Resource):
 
     @jwt_required
     def delete(self, user_id, recipe_id):
-        pass
+        recipe = Recipe.get_by_id(user_id, recipe_id)
+        if not recipe:
+            return make_response(jsonify(message='User not found.'), 404)
+
+        recipe.remove_from_db()
+        return make_response(204)

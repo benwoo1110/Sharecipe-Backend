@@ -171,7 +171,11 @@ class UserRecipe(Resource):
 class UserRecipeData(Resource):
     @jwt_required()
     def get(self, user_id, recipe_id):
-        pass
+        recipe = Recipe.get_by_id(user_id, recipe_id)
+        if not recipe:
+            return make_response(jsonify(message='User not found.'), 404)
+        
+        return make_response(jsonify(recipe), 201)
 
     @jwt_required()
     def patch(self, user_id, recipe_id):

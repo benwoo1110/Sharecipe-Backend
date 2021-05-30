@@ -89,7 +89,14 @@ class TestAPI(unittest.TestCase):
         data = response.json()
         self.assertDictEqual(data, TestAPI.test_recipe)
 
-    def test_delete_recipe(self):
+    def test_patch_recipe(self):
+        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        payload = {'name': 'Poison'}
+        response = requests.patch(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header, json=payload)
+        data = response.json()
+        self.assertEqual(data.get('name'), 'Poison')
+
+    def test_recipe_delete(self):
         header = {'Authorization': f'Bearer {self.a3.access_token}'}
         response = requests.delete(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
         self.assertEqual(response.status_code, 204)
@@ -104,4 +111,5 @@ class TestAPI(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    unittest.TestLoader.sortTestMethodsUsing = None
     unittest.main()

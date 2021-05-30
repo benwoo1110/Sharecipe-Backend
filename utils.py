@@ -36,7 +36,8 @@ class JsonParser:
             except Exception as e:
                 abort(400, message=str(e))
             else:
-                parsed_data[arg] = value
+                if value:
+                    parsed_data[arg] = value
 
         return parsed_data
 

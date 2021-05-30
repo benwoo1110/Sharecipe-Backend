@@ -1,4 +1,4 @@
-from flask import jsonify, make_response
+from flask import json, jsonify, make_response
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
 from models import RecipeStep, User, Recipe, RevokedToken
@@ -157,13 +157,25 @@ class UserRecipeData(Resource):
     def get(self, user_id, recipe_id):
         recipe = Recipe.get_by_id(user_id, recipe_id)
         if not recipe:
-            return make_response(jsonify(message='No users found.'), 404)
+            return make_response(jsonify(message='No recipe found.'), 404)
         
-        return make_response(jsonify(recipe), 201)
+        return make_response(jsonify(recipe), 200)
 
     @jwt_required()
     def patch(self, user_id, recipe_id):
-        pass
+        recipe = Recipe.get_by_id(user_id, recipe_id)
+        if not recipe:
+            return make_response(jsonify(message='No recipe found.'), 404)
+        
+        data = recipe_parser.parse_args()
+        if data.get('steps'):
+            steps = []
+            for step_data in data.get('steps'):
+                steps.append(RecipeStep(**step_data))
+            data['steps'] = steps
+
+        recipe.update(**data)
+        return make_response(jsonify(recipe), 200)
 
     @jwt_required()
     def delete(self, user_id, recipe_id):

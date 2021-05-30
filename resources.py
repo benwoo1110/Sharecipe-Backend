@@ -101,10 +101,6 @@ class UserSearch(Resource):
     def get(self):
         username = request.args.get('username', '')
         users = User.search_username(username)
-
-        if not users:
-            return make_response(jsonify(message='No users found.'), 404)
-
         return make_response(jsonify(users), 200)
 
 

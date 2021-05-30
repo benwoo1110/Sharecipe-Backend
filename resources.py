@@ -173,3 +173,17 @@ class UserRecipeData(Resource):
 
         recipe.remove_from_db()
         return make_response('', 204)
+
+
+class RecipeStepData(Resource):
+    @jwt_required()
+    def get(self, user_id, recipe_id, step_num):
+        pass
+
+    @jwt_required()
+    def patch(self, user_id, recipe_id, step_num):
+        pass
+
+    @jwt_required()
+    def delete(self, user_id, recipe_id, step_num):
+        pass

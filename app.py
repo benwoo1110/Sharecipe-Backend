@@ -39,6 +39,7 @@ api.add_resource(resources.UserSearch,      '/users') # GET
 api.add_resource(resources.UserData,        '/users/<int:user_id>') # GET PATCH
 api.add_resource(resources.UserRecipe,      '/users/<int:user_id>/recipes') # GET PUT
 api.add_resource(resources.UserRecipeData,  '/users/<int:user_id>/recipes/<int:recipe_id>') # GET PATCH DELETE
+api.add_resource(resources.RecipeStepData,  '/users/<int:user_id>/recipes/<int:recipe_id>/<int:step_num>') # GET PATCH DELETE
 
 
 if __name__ == "__main__":

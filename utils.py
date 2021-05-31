@@ -1,4 +1,6 @@
+from datetime import datetime
 from flask import jsonify
+from flask.json import JSONEncoder
 from flask_restful import request, abort, Api
 from jwt.exceptions import ExpiredSignatureError
 
@@ -40,6 +42,14 @@ class JsonParser:
                     parsed_data[arg] = value
 
         return parsed_data
+
+
+class BetterJSONEncoder(JSONEncoder):
+    def default(self, o):
+        if isinstance(o, datetime):
+            return o.astimezone().isoformat()
+
+        return super().default(o)
 
 
 class ApiHandler(Api):

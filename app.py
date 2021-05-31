@@ -1,11 +1,12 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-from utils import ApiHandler
+from utils import ApiHandler, BetterJSONEncoder
 
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+app.json_encoder = BetterJSONEncoder
 
 
 api = ApiHandler(app)

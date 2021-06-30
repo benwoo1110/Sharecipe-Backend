@@ -119,7 +119,9 @@ class TestAPI(unittest.TestCase):
         #TODO Check file equality
 
     def test_profile_image2_delete(self):
-        pass
+        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        response = requests.delete(f'{URL}/users/{self.a3.user_id}/profileimage', headers=header)
+        self.assertEqual(response.status_code, 200)
 
     @classmethod
     def tearDownClass(cls):

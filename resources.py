@@ -143,6 +143,10 @@ class UserProfileImage(Resource):
 
     @jwt_required()
     def put(self, user_id):
+        account_user_id = get_jwt_identity()
+        if account_user_id != user_id:
+            return make_response(jsonify(message='You can only modify your own user data!'), 403)
+
         user = User.get_by_id(user_id)
         if not user:
             return make_response(jsonify(message='No users found.'), 404)
@@ -153,7 +157,23 @@ class UserProfileImage(Resource):
 
         file_id = file_manager.save(uploaded_file)
         user.update(profile_image=file_id)
-        return make_response(jsonify(message='Profile picture uploaded'), 200)
+        return make_response(jsonify(message='Profile picture uploaded.'), 200)
+
+    @jwt_required()
+    def delete(self, user_id):
+        account_user_id = get_jwt_identity()
+        if account_user_id != user_id:
+            return make_response(jsonify(message='You can only modify your own user data!'), 403)
+
+        user = User.get_by_id(user_id)
+        if not user:
+            return make_response(jsonify(message='No users found.'), 404)
+        if not user.profile_image:
+            return make_response(jsonify(message='Nothing to delete'), 304)
+
+        file_manager.delete(user.profile_image)
+        user.update(profile_image=None)
+        return make_response(jsonify(message='Profile picture deleted.'), 200)
 
 
 class UserRecipe(Resource):

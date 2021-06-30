@@ -103,6 +103,13 @@ class TestAPI(unittest.TestCase):
         response = requests.get(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
         self.assertEqual(response.status_code, 404)
 
+    def test_profile_image_upload(self):
+        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        with open('test.png', 'rb') as image_file:
+            test_image = {'image': image_file}
+            response = requests.put(f'{URL}/users/{self.a3.user_id}/profileimage', headers=header, files=test_image)
+            self.assertEqual(response.status_code, 200)
+
     @classmethod
     def tearDownClass(cls):
         cls.a1.delete()

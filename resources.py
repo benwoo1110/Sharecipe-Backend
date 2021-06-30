@@ -1,8 +1,9 @@
-from flask import json, jsonify, make_response
+from flask import jsonify, make_response, send_from_directory
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
 from models import RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
+import file_manager
 
 
 account_parser = JsonParser()
@@ -126,6 +127,29 @@ class UserData(Resource):
 
         user.update(**data)
         return obj_to_dict(user, 'user_id', 'username', 'bio'), 200
+
+
+class UserProfileImage(Resource):
+    @jwt_required()
+    def get(self, user_id):
+        user = User.get_by_id(user_id)
+        if not user:
+            return make_response(jsonify(message='No users found.'), 404)
+        
+        send_from_directory(file_manager.SAVE_LOCATION, user.profile_image, as_attachment=True)
+
+    @jwt_required()
+    def put(self, user_id):
+        user = User.get_by_id(user_id)
+        if not user:
+            return make_response(jsonify(message='No users found.'), 404)
+        
+        uploaded_file = request.files['image']
+        if not uploaded_file or uploaded_file.filename == '':
+            return make_response(jsonify(message='No image uploaded.'), 404)
+
+        print(file_manager.save(uploaded_file))
+        return make_response(jsonify(message='Profile picture uploaded'), 200)
 
 
 class UserRecipe(Resource):

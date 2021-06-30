@@ -16,6 +16,7 @@ class User(db.Model):
     username = db.Column(db.String(128), unique = True, nullable = False)
     password_hash = db.Column(db.String(128), nullable = False)
     bio = db.Column(db.String(512), nullable = True)
+    profile_image = db.Column(db.String(256), nullable = True)
     time_created = db.Column(db.DateTime(), nullable = False)
 
     def add_to_db(self):

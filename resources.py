@@ -139,7 +139,7 @@ class UserProfileImage(Resource):
             return make_response(jsonify(message='User does not have a profile picture'), 404)
 
         output = file_manager.download(user.profile_image)
-        return make_response(send_file(output), 200)
+        return make_response(send_file(output, as_attachment=True), 200)
 
     @jwt_required()
     def put(self, user_id):

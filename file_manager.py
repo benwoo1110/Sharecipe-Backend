@@ -29,5 +29,8 @@ def upload(file_id):
 
 def download(file_id):
     output = path.join(SAVE_LOCATION, file_id)
+    if path.isfile(output):
+        return output
+    
     s3_resource.Bucket(config.AWS_BUCKET_NAME).download_file(file_id, output)
     return output

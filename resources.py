@@ -1,4 +1,4 @@
-from flask import jsonify, make_response, send_from_directory
+from flask import jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
 from models import RecipeStep, User, Recipe, RevokedToken
@@ -135,8 +135,11 @@ class UserProfileImage(Resource):
         user = User.get_by_id(user_id)
         if not user:
             return make_response(jsonify(message='No users found.'), 404)
-        
-        send_from_directory(file_manager.SAVE_LOCATION, user.profile_image, as_attachment=True)
+        if not user.profile_image:
+            return make_response(jsonify(message='User does not have a profile picture'), 404)
+
+        output = file_manager.download(user.profile_image)
+        return make_response(send_file(output), 200)
 
     @jwt_required()
     def put(self, user_id):

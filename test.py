@@ -103,12 +103,23 @@ class TestAPI(unittest.TestCase):
         response = requests.get(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
         self.assertEqual(response.status_code, 404)
 
-    def test_profile_image_upload(self):
+    def test_profile_image0_upload(self):
         header = {'Authorization': f'Bearer {self.a3.access_token}'}
         with open('test.png', 'rb') as image_file:
             test_image = {'image': image_file}
             response = requests.put(f'{URL}/users/{self.a3.user_id}/profileimage', headers=header, files=test_image)
             self.assertEqual(response.status_code, 200)
+
+    def test_profile_image1_download(self):
+        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        response = requests.get(f'{URL}/users/{self.a3.user_id}/profileimage', headers=header)
+        self.assertEqual(response.status_code, 200)
+        with open('downloaded_test.png', "wb") as file:
+            file.write(response.content)
+        #TODO Check file equality
+
+    def test_profile_image2_delete(self):
+        pass
 
     @classmethod
     def tearDownClass(cls):

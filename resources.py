@@ -148,7 +148,8 @@ class UserProfileImage(Resource):
         if not uploaded_file or uploaded_file.filename == '':
             return make_response(jsonify(message='No image uploaded.'), 404)
 
-        print(file_manager.save(uploaded_file))
+        file_id = file_manager.save(uploaded_file)
+        user.update(profile_image=file_id)
         return make_response(jsonify(message='Profile picture uploaded'), 200)
 
 

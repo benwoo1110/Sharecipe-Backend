@@ -203,16 +203,16 @@ class UserRecipe(Resource):
 class UserRecipeData(Resource):
     @jwt_required()
     def get(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(user_id, recipe_id)
-        if not recipe:
+        recipe = Recipe.get_by_id(recipe_id)
+        if not recipe or recipe.user_id != user_id:
             return make_response(jsonify(message='No recipe found.'), 404)
         
         return make_response(jsonify(recipe), 200)
 
     @jwt_required()
     def patch(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(user_id, recipe_id)
-        if not recipe:
+        recipe = Recipe.get_by_id(recipe_id)
+        if not recipe or recipe.user_id != user_id:
             return make_response(jsonify(message='No recipe found.'), 404)
         
         data = recipe_parser.parse_args()
@@ -227,8 +227,8 @@ class UserRecipeData(Resource):
 
     @jwt_required()
     def delete(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(user_id, recipe_id)
-        if not recipe:
+        recipe = Recipe.get_by_id(recipe_id)
+        if not recipe or recipe.user_id != user_id:
             return make_response(jsonify(message='User not found.'), 404)
 
         recipe.remove_from_db()
@@ -238,7 +238,11 @@ class UserRecipeData(Resource):
 class RecipeStepData(Resource):
     @jwt_required()
     def get(self, user_id, recipe_id, step_num):
-        pass
+        step = RecipeStep.get_by_id(recipe_id, step_num)
+        if not step or step.user_id != user_id:
+            return make_response(jsonify(message='No such step found.'), 404)
+
+        return make_response(jsonify(step), 404)
 
     @jwt_required()
     def patch(self, user_id, recipe_id, step_num):

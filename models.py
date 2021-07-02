@@ -91,8 +91,8 @@ class Recipe(db.Model):
         db.session.commit()
 
     @classmethod
-    def get_by_id(cls, user_id: int, recipe_id: int):
-        return cls.query.filter_by(user_id=user_id, recipe_id=recipe_id).first()
+    def get_by_id(cls, recipe_id: int):
+        return cls.query.filter_by(recipe_id=recipe_id).first()
 
     @classmethod
     def get_by_name(cls, name: str):
@@ -114,6 +114,20 @@ class RecipeStep(db.Model):
     name = db.Column(db.Integer, nullable = True)
     description = db.Column(db.String(1024), nullable = True)
     time_needed = db.Column(db.Integer, nullable = True)
+
+    def update(self, **kwargs):
+        for attr, data in kwargs.items():
+            if hasattr(self, attr):
+                setattr(self, attr, data)
+        db.session.commit()
+
+    def remove_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    @classmethod
+    def get_by_id(cls, recipe_id: int, step_number: int):
+        return cls.query.filter_by(recipe_id=recipe_id, step_number=step_number).first()
 
 
 class RevokedToken(db.Model):

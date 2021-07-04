@@ -11,6 +11,7 @@ class User(db.Model):
     user_id: int
     username: str
     bio: str
+    time_created: datetime
     profile_image: str
 
     user_id = db.Column(db.Integer, primary_key = True)

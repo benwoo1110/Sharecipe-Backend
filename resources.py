@@ -1,9 +1,13 @@
 from flask import jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
-from models import RecipeStep, User, Recipe, RevokedToken
+from models import Ingredient, RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
-import file_manager
+from file_manager import S3FileManager, LocalFileManager
+import config
+
+
+file_manager = S3FileManager() if config.PRODUCTION_MODE else LocalFileManager()
 
 
 account_parser = JsonParser()
@@ -23,6 +27,14 @@ recipe_parser.add_arg('portion', required=False)
 recipe_parser.add_arg('difficulty', required=False)
 recipe_parser.add_arg('total_time_needed', required=False)
 recipe_parser.add_arg('steps', required=False)
+recipe_parser.add_arg('ingredients', required=False)
+
+
+recipe_step_parser = JsonParser()
+recipe_step_parser.add_arg('step_number')
+recipe_step_parser.add_arg('name')
+recipe_step_parser.add_arg('description', required=False)
+recipe_step_parser.add_arg('time_needed', required=False)
 
 
 class HelloWorld(Resource):
@@ -206,7 +218,13 @@ class UserRecipe(Resource):
                 steps.append(RecipeStep(**step_data))
             data['steps'] = steps
 
-        recipe = Recipe(user_id=user_id, **data)
+        if data.get('ingredients'):
+            ingredients = []
+            for ingredient_data in data.get('ingredients'):
+                ingredients.append(Ingredient(**ingredient_data))
+            data['ingredients'] = ingredients
+
+        recipe = Recipe(user_id=account_user_id, **data)
         recipe.add_to_db()
 
         return make_response(jsonify(recipe), 201)
@@ -215,16 +233,16 @@ class UserRecipe(Resource):
 class UserRecipeData(Resource):
     @jwt_required()
     def get(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(user_id, recipe_id)
-        if not recipe:
+        recipe = Recipe.get_by_id(recipe_id)
+        if not recipe or recipe.user_id != user_id:
             return make_response(jsonify(message='No recipe found.'), 404)
         
         return make_response(jsonify(recipe), 200)
 
     @jwt_required()
     def patch(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(user_id, recipe_id)
-        if not recipe:
+        recipe = Recipe.get_by_id(recipe_id)
+        if not recipe or recipe.user_id != user_id:
             return make_response(jsonify(message='No recipe found.'), 404)
         
         data = recipe_parser.parse_args()
@@ -239,8 +257,8 @@ class UserRecipeData(Resource):
 
     @jwt_required()
     def delete(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(user_id, recipe_id)
-        if not recipe:
+        recipe = Recipe.get_by_id(recipe_id)
+        if not recipe or recipe.user_id != user_id:
             return make_response(jsonify(message='User not found.'), 404)
 
         recipe.remove_from_db()
@@ -250,12 +268,39 @@ class UserRecipeData(Resource):
 class RecipeStepData(Resource):
     @jwt_required()
     def get(self, user_id, recipe_id, step_num):
-        pass
+        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
+        if not step:
+            return make_response(jsonify(message='No such step found.'), 404)
+
+        return make_response(jsonify(step), 200)
+
+    @jwt_required()
+    def put(self, user_id, recipe_id, step_num):
+        account_user_id = get_jwt_identity()
+        if account_user_id != user_id:
+            return make_response(jsonify(message='You can only modify your own user data!'), 403)
+
+        data = recipe_parser.parse_args()
+        recipeStep = RecipeStep(recipe_id=recipe_id, step_num=step_num, **data)
+        recipeStep.add_to_db()
+
+        return make_response(jsonify(recipeStep), 201)
 
     @jwt_required()
     def patch(self, user_id, recipe_id, step_num):
-        pass
+        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
+        if not step:
+            return make_response(jsonify(message='No such step found.'), 404)
+
+        data = recipe_parser.parse_args()
+        step.update(data)
+        return make_response(jsonify(step), 200)
 
     @jwt_required()
     def delete(self, user_id, recipe_id, step_num):
-        pass
+        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
+        if not step:
+            return make_response(jsonify(message='No such step found.'), 404)
+
+        step.remove_from_db()
+        return make_response('', 204)

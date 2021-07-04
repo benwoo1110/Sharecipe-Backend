@@ -67,15 +67,17 @@ class Recipe(db.Model):
     total_time_needed: int
     time_created: datetime
     steps: list
+    ingredients: list
 
     recipe_id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    name = db.Column(db.String(128), nullable = False)
+    name = db.Column(db.String(256), nullable = False)
     portion = db.Column(db.Integer, nullable = True)
     difficulty = db.Column(db.Integer, nullable = True)
     total_time_needed = db.Column(db.Integer, nullable = True)
     time_created = db.Column(db.DateTime(), nullable = False)
     steps = db.relationship('RecipeStep', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
+    ingredients = db.relationship('Ingredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
 
     def add_to_db(self):
         self.time_created = datetime.now()
@@ -93,8 +95,8 @@ class Recipe(db.Model):
         db.session.commit()
 
     @classmethod
-    def get_by_id(cls, user_id: int, recipe_id: int):
-        return cls.query.filter_by(user_id=user_id, recipe_id=recipe_id).first()
+    def get_by_id(cls, recipe_id: int):
+        return cls.query.filter_by(recipe_id=recipe_id).first()
 
     @classmethod
     def get_by_name(cls, name: str):
@@ -113,9 +115,58 @@ class RecipeStep(db.Model):
 
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'), primary_key = True)
     step_number = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.Integer, nullable = True)
+    name = db.Column(db.String(256), nullable = False)
     description = db.Column(db.String(1024), nullable = True)
     time_needed = db.Column(db.Integer, nullable = True)
+
+    def add_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self, **kwargs):
+        for attr, data in kwargs.items():
+            if hasattr(self, attr):
+                setattr(self, attr, data)
+        db.session.commit()
+
+    def remove_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    @classmethod
+    def get_by_id(cls, recipe_id: int, step_number: int):
+        return cls.query.filter_by(recipe_id=recipe_id, step_number=step_number).first()
+
+
+@dataclass
+class Ingredient(db.Model):
+    __tablename__ = 'ingredients'
+
+    ingredient_id: int
+    recipe_id: int
+    name: str
+    quantity: int
+    unit: str
+
+    ingredient_id = db.Column(db.Integer, primary_key = True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
+    name = db.Column(db.String(256), nullable = False)
+    quantity = db.Column(db.Integer, nullable = True)
+    unit = db.Column(db.String(32), nullable = True)
+
+    def add_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self, **kwargs):
+        for attr, data in kwargs.items():
+            if hasattr(self, attr):
+                setattr(self, attr, data)
+        db.session.commit()
+
+    def remove_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
 
 
 class RevokedToken(db.Model):

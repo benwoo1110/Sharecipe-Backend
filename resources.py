@@ -1,7 +1,7 @@
 from flask import jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
-from models import RecipeStep, User, Recipe, RevokedToken
+from models import Ingredient, RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 import file_manager
 
@@ -23,6 +23,7 @@ recipe_parser.add_arg('portion', required=False)
 recipe_parser.add_arg('difficulty', required=False)
 recipe_parser.add_arg('total_time_needed', required=False)
 recipe_parser.add_arg('steps', required=False)
+recipe_parser.add_arg('ingredients', required=False)
 
 
 recipe_step_parser = JsonParser()
@@ -213,6 +214,12 @@ class UserRecipe(Resource):
             for step_data in data.get('steps'):
                 steps.append(RecipeStep(**step_data))
             data['steps'] = steps
+
+        if data.get('steps'):
+            steps = []
+            for step_data in data.get('ingredients'):
+                steps.append(Ingredient(**step_data))
+            data['ingredients'] = steps
 
         recipe = Recipe(user_id=user_id, **data)
         recipe.add_to_db()

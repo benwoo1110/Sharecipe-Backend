@@ -76,7 +76,7 @@ class Recipe(db.Model):
     total_time_needed = db.Column(db.Integer, nullable = True)
     time_created = db.Column(db.DateTime(), nullable = False)
     steps = db.relationship('RecipeStep', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
-    steps = db.relationship('Ingredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
+    ingredients = db.relationship('Ingredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
 
     def add_to_db(self):
         self.time_created = datetime.now()

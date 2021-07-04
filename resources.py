@@ -25,6 +25,14 @@ recipe_parser.add_arg('total_time_needed', required=False)
 recipe_parser.add_arg('steps', required=False)
 
 
+recipe_step_parser = JsonParser()
+recipe_parser.add_arg('recipe_id')
+recipe_parser.add_arg('step_number')
+recipe_parser.add_arg('name')
+recipe_parser.add_arg('description', required=False)
+recipe_parser.add_arg('time_needed', required=False)
+
+
 class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}, 200
@@ -250,16 +258,39 @@ class UserRecipeData(Resource):
 class RecipeStepData(Resource):
     @jwt_required()
     def get(self, user_id, recipe_id, step_num):
-        step = RecipeStep.get_by_id(recipe_id, step_num)
-        if not step or step.user_id != user_id:
+        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
+        if not step:
             return make_response(jsonify(message='No such step found.'), 404)
 
-        return make_response(jsonify(step), 404)
+        return make_response(jsonify(step), 200)
+
+    @jwt_required()
+    def put(self, user_id, recipe_id, step_num):
+        account_user_id = get_jwt_identity()
+        if account_user_id != user_id:
+            return make_response(jsonify(message='You can only modify your own user data!'), 403)
+
+        data = recipe_parser.parse_args()
+        recipeStep = RecipeStep(recipe_id=recipe_id, step_num=step_num, **data)
+        recipeStep.add_to_db()
+
+        return make_response(jsonify(recipeStep), 201)
 
     @jwt_required()
     def patch(self, user_id, recipe_id, step_num):
-        pass
+        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
+        if not step:
+            return make_response(jsonify(message='No such step found.'), 404)
+
+        data = recipe_parser.parse_args()
+        step.update(data)
+        return make_response(jsonify(step), 200)
 
     @jwt_required()
     def delete(self, user_id, recipe_id, step_num):
-        pass
+        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
+        if not step:
+            return make_response(jsonify(message='No such step found.'), 404)
+
+        step.remove_from_db()
+        return make_response('', 204)

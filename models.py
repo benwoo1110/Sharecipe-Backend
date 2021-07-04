@@ -117,6 +117,10 @@ class RecipeStep(db.Model):
     description = db.Column(db.String(1024), nullable = True)
     time_needed = db.Column(db.Integer, nullable = True)
 
+    def add_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
     def update(self, **kwargs):
         for attr, data in kwargs.items():
             if hasattr(self, attr):

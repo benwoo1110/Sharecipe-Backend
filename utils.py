@@ -55,5 +55,5 @@ class BetterJSONEncoder(JSONEncoder):
 class ApiHandler(Api):
     def error_router(self, original_handler, e):
         if self._has_fr_route() and isinstance(e, ExpiredSignatureError):
-            return jsonify({'message': 'Access token expired!'}), 400
+            return jsonify({'message': 'Access token expired!'}), 403
         return original_handler(e)

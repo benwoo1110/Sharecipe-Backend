@@ -3,7 +3,11 @@ from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
 from models import Ingredient, RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
-import file_manager
+from file_manager import S3FileManager, LocalFileManager
+import config
+
+
+file_manager = S3FileManager() if config.PRODUCTION_MODE else LocalFileManager()
 
 
 account_parser = JsonParser()

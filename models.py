@@ -67,6 +67,7 @@ class Recipe(db.Model):
     total_time_needed: int
     time_created: datetime
     steps: list
+    ingredients: list
 
     recipe_id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))

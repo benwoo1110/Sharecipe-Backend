@@ -27,11 +27,10 @@ recipe_parser.add_arg('ingredients', required=False)
 
 
 recipe_step_parser = JsonParser()
-recipe_parser.add_arg('recipe_id')
-recipe_parser.add_arg('step_number')
-recipe_parser.add_arg('name')
-recipe_parser.add_arg('description', required=False)
-recipe_parser.add_arg('time_needed', required=False)
+recipe_step_parser.add_arg('step_number')
+recipe_step_parser.add_arg('name')
+recipe_step_parser.add_arg('description', required=False)
+recipe_step_parser.add_arg('time_needed', required=False)
 
 
 class HelloWorld(Resource):
@@ -215,13 +214,13 @@ class UserRecipe(Resource):
                 steps.append(RecipeStep(**step_data))
             data['steps'] = steps
 
-        if data.get('steps'):
+        if data.get('ingredients'):
             steps = []
             for step_data in data.get('ingredients'):
                 steps.append(Ingredient(**step_data))
             data['ingredients'] = steps
 
-        recipe = Recipe(user_id=user_id, **data)
+        recipe = Recipe(user_id=account_user_id, **data)
         recipe.add_to_db()
 
         return make_response(jsonify(recipe), 201)

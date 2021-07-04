@@ -26,110 +26,129 @@ class Account:
 class TestAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.a1 = Account.add('testing123', '123456', 'A human!')
-        cls.a2 = Account.add('testing456', '123456')
-        cls.a3 = Account.add('admin123', '123456')
-        cls.maxDiff = None
+        # Create user accounts
+        cls.user1 = Account.add('testing123', '123456', 'A human!')
+        cls.user2 = Account.add('testing456', '123456')
+        cls.user3 = Account.add('admin123', '123456')
 
-    def test_hello_world(self):
+    @classmethod
+    def tearDownClass(cls):
+        # Delete the test accounts
+        cls.user1.delete()
+        cls.user2.delete()
+        cls.user3.delete()
+
+    def test_all(self):
+        user1 = self.user1
+        user2 = self.user2
+        user3 = self.user3
+
+        # Hello world
         response = requests.get(f'{URL}/hello')
         data = response.json()
         self.assertDictEqual(data, {'hello': 'world'})
 
-    def test_user_login(self):
+        # User login
         payload = {'username': 'testing123', 'password': '123456'}
         response = requests.post(f'{URL}/account/login', json=payload)
         data = response.json()
-        self.assertEqual(self.a1.user_id, data.get('user_id'))
+        self.assertEqual(user1.user_id, data.get('user_id'))
 
-    def test_user_search(self):
-        header = {'Authorization': f'Bearer {self.a1.access_token}'}
-        response = requests.get(f'{URL}/users', headers=header)
-        data = response.json()
-        self.assertListEqual(data, [
-            {'user_id': self.a1.user_id, 'username': 'testing123', 'bio': 'A human!'}, 
-            {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None}, 
-            {'user_id': self.a3.user_id, 'username': 'admin123', 'bio': None}
-        ])
+        # # Search users
+        # header = {'Authorization': f'Bearer {user1.access_token}'}
+        # response = requests.get(f'{URL}/users', headers=header)
+        # data = response.json()
+        # self.assertListEqual(data, [
+        #     {'user_id': user1.user_id, 'username': 'testing123', 'bio': 'A human!'}, 
+        #     {'user_id': user2.user_id, 'username': 'testing456', 'bio': None}, 
+        #     {'user_id': user3.user_id, 'username': 'admin123', 'bio': None}
+        # ])
 
-    def test_user_search_with_query(self):
-        header = {'Authorization': f'Bearer {self.a1.access_token}'}
-        response = requests.get(f'{URL}/users?username=test', headers=header)
-        data = response.json()
-        self.assertIsInstance(data, list)
-        self.assertListEqual(data, [
-            {'user_id': self.a1.user_id, 'username': 'testing123', 'bio': 'A human!'}, 
-            {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None}
-        ])
+        # # Search users with query
+        # header = {'Authorization': f'Bearer {user1.access_token}'}
+        # response = requests.get(f'{URL}/users?username=test', headers=header)
+        # data = response.json()
+        # self.assertIsInstance(data, list)
+        # self.assertListEqual(data, [
+        #     {'user_id': user1.user_id, 'username': 'testing123', 'bio': 'A human!'}, 
+        #     {'user_id': user2.user_id, 'username': 'testing456', 'bio': None}
+        # ])
 
-    def test_user_get_data(self):
-        header = {'Authorization': f'Bearer {self.a1.access_token}'}
-        response = requests.get(f'{URL}/users/{self.a2.user_id}', headers=header)
+        # Get user data
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/users/{user2.user_id}', headers=header)
         data = response.json()
         self.assertIsInstance(data, dict)
-        self.assertDictEqual(data, {'user_id': self.a2.user_id, 'username': 'testing456', 'bio': None})
+        self.matchDict(data, user_id=user2.user_id, username="testing456", bio=None)
 
-    def test_user_update_data(self):
-        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        # Update user data
+        header = {'Authorization': f'Bearer {user1.access_token}'}
         payload = {'username': 'totallyNotAdmin', 'bio': 'Code. Create. Coordinate.'}
-        response = requests.patch(f'{URL}/users/{self.a3.user_id}', headers=header, json=payload)
+        response = requests.patch(f'{URL}/users/{user1.user_id}', headers=header, json=payload)
         data = response.json()
-        self.assertDictEqual(data, {'user_id': self.a3.user_id, 'username': 'totallyNotAdmin', 'bio': 'Code. Create. Coordinate.'})
+        self.matchDict(data, user_id=user1.user_id, username="totallyNotAdmin", bio="Code. Create. Coordinate.")
 
-    def test_create_new_recipe(self):
-        header = {'Authorization': f'Bearer {self.a3.access_token}'}
-        payload = {'name': 'Edible food', 'steps': [{'step_number': 1, 'name': 'a', 'description': 'Add water.'}, {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}]}
-        response = requests.put(f'{URL}/users/{self.a3.user_id}/recipes', headers=header, json=payload)
+        # Create new recipe
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        payload = {
+            'name': 'Edible food',
+            'difficulty': 5,
+            'steps': [
+                {'step_number': 1, 'name': 'a', 'description': 'Add water.'}, 
+                {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}
+            ],
+            'ingredients': [
+                {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
+                {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+            ]
+        }
+        response = requests.put(f'{URL}/users/{user3.user_id}/recipes', headers=header, json=payload)
+        recipe_data = response.json()
+        self.matchDict(recipe_data, user_id=user3.user_id, name="Edible food", difficulty=5)
+
+        # Get recipe data
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)
         data = response.json()
-        TestAPI.test_recipe = data
+        self.assertDictEqual(data, recipe_data)
 
-    def test_data_get_recipe(self):
-        header = {'Authorization': f'Bearer {self.a3.access_token}'}
-        response = requests.get(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
-        data = response.json()
-        self.assertDictEqual(data, TestAPI.test_recipe)
-
-    def test_patch_recipe(self):
-        header = {'Authorization': f'Bearer {self.a3.access_token}'}
+        # Update recipe data
+        header = {'Authorization': f'Bearer {user3.access_token}'}
         payload = {'name': 'Poison'}
-        response = requests.patch(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header, json=payload)
+        response = requests.patch(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header, json=payload)
         data = response.json()
         self.assertEqual(data.get('name'), 'Poison')
 
-    def test_recipe_delete(self):
-        header = {'Authorization': f'Bearer {self.a3.access_token}'}
-        response = requests.delete(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
+        # Delete recipe
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        response = requests.delete(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)
         self.assertEqual(response.status_code, 204)
-        response = requests.get(f'{URL}/users/{self.a3.user_id}/recipes/{TestAPI.test_recipe.get("recipe_id")}', headers=header)
+        response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)
         self.assertEqual(response.status_code, 404)
 
-    def test_profile_image0_upload(self):
-        header = {'Authorization': f'Bearer {self.a3.access_token}'}
-        with open('test.png', 'rb') as image_file:
+        # Upload profile image
+        header = {'Authorization': f'Bearer {user2.access_token}'}
+        with open('tests/test.png', 'rb') as image_file:
             test_image = {'image': image_file}
-            response = requests.put(f'{URL}/users/{self.a3.user_id}/profileimage', headers=header, files=test_image)
+            response = requests.put(f'{URL}/users/{user2.user_id}/profileimage', headers=header, files=test_image)
             self.assertEqual(response.status_code, 200)
 
-    def test_profile_image1_download(self):
-        header = {'Authorization': f'Bearer {self.a3.access_token}'}
-        response = requests.get(f'{URL}/users/{self.a3.user_id}/profileimage', headers=header)
+        # Download profile image
+        header = {'Authorization': f'Bearer {user2.access_token}'}
+        response = requests.get(f'{URL}/users/{user2.user_id}/profileimage', headers=header)
         self.assertEqual(response.status_code, 200)
-        with open('downloaded_test.png', "wb") as file:
+        with open('tests/downloaded_test.png', "wb") as file:
             file.write(response.content)
-        #TODO Check file equality
 
-    def test_profile_image2_delete(self):
-        header = {'Authorization': f'Bearer {self.a3.access_token}'}
-        response = requests.delete(f'{URL}/users/{self.a3.user_id}/profileimage', headers=header)
+        # Delete profile image
+        header = {'Authorization': f'Bearer {user2.access_token}'}
+        response = requests.delete(f'{URL}/users/{user2.user_id}/profileimage', headers=header)
         self.assertEqual(response.status_code, 200)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.a1.delete()
-        cls.a2.delete()
-        cls.a3.delete()
+    def matchDict(self, actual, **expected):
+        for key, value in expected.items():
+            self.assertEqual(actual.get(key), value)
 
 
 if __name__ == '__main__':
-    unittest.TestLoader.sortTestMethodsUsing = None
     unittest.main()

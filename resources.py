@@ -215,10 +215,10 @@ class UserRecipe(Resource):
             data['steps'] = steps
 
         if data.get('ingredients'):
-            steps = []
-            for step_data in data.get('ingredients'):
-                steps.append(Ingredient(**step_data))
-            data['ingredients'] = steps
+            ingredients = []
+            for ingredient_data in data.get('ingredients'):
+                ingredients.append(Ingredient(**ingredient_data))
+            data['ingredients'] = ingredients
 
         recipe = Recipe(user_id=account_user_id, **data)
         recipe.add_to_db()

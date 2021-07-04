@@ -68,6 +68,7 @@ class Recipe(db.Model):
     time_created: datetime
     steps: list
     ingredients: list
+    images: list
 
     recipe_id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
@@ -77,7 +78,8 @@ class Recipe(db.Model):
     total_time_needed = db.Column(db.Integer, nullable = True)
     time_created = db.Column(db.DateTime(), nullable = False)
     steps = db.relationship('RecipeStep', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
-    ingredients = db.relationship('Ingredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
+    ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
+    images = db.relationship('RecipeImage', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
 
     def add_to_db(self):
         self.time_created = datetime.now()
@@ -139,8 +141,8 @@ class RecipeStep(db.Model):
 
 
 @dataclass
-class Ingredient(db.Model):
-    __tablename__ = 'ingredients'
+class RecipeIngredient(db.Model):
+    __tablename__ = 'recipe_ingredients'
 
     ingredient_id: int
     recipe_id: int
@@ -162,6 +164,25 @@ class Ingredient(db.Model):
         for attr, data in kwargs.items():
             if hasattr(self, attr):
                 setattr(self, attr, data)
+        db.session.commit()
+
+    def remove_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+@dataclass
+class RecipeImage(db.Model):
+    __tablename__ = 'recipe_images'
+
+    image_id: str
+    recipe_id: int
+
+    image_id = db.Column(db.String(256), primary_key = True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
+
+    def add_to_db(self):
+        db.session.add(self)
         db.session.commit()
 
     def remove_from_db(self):

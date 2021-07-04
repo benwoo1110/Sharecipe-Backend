@@ -1,7 +1,7 @@
 from flask import jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
-from models import Ingredient, RecipeStep, User, Recipe, RevokedToken
+from models import RecipeIngredient, RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 from file_manager import S3FileManager, LocalFileManager
 import config
@@ -220,7 +220,7 @@ class UserRecipe(Resource):
         if data.get('ingredients'):
             ingredients = []
             for ingredient_data in data.get('ingredients'):
-                ingredients.append(Ingredient(**ingredient_data))
+                ingredients.append(RecipeIngredient(**ingredient_data))
             data['ingredients'] = ingredients
 
         recipe = Recipe(user_id=account_user_id, **data)

@@ -112,6 +112,7 @@ class RecipeStep(db.Model, EditableDb):
     def get_by_id(cls, recipe_id: int, step_number: int):
         return cls.query.filter_by(recipe_id=recipe_id, step_number=step_number).first()
 
+
 @dataclass
 class RecipeIngredient(db.Model, EditableDb):
     __tablename__ = 'recipe_ingredients'

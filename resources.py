@@ -13,7 +13,6 @@ file_manager = S3FileManager() if config.PRODUCTION_MODE else LocalFileManager()
 account_parser = JsonParser()
 account_parser.add_arg('username')
 account_parser.add_arg('password')
-account_parser.add_arg('bio', required=False)
 
 
 user_parser = JsonParser()

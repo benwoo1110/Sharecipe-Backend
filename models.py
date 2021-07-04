@@ -4,8 +4,25 @@ from passlib.hash import pbkdf2_sha256 as sha256
 from dataclasses import dataclass
 
 
+class EditableDb:
+    def add_to_db(self):
+        self.time_created = datetime.now()
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self, **kwargs):
+        for attr, data in kwargs.items():
+            if hasattr(self, attr):
+                setattr(self, attr, data)
+        db.session.commit()
+
+    def remove_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
 @dataclass
-class User(db.Model):
+class User(db.Model, EditableDb):
     __tablename__ = 'users'
 
     user_id: int
@@ -20,21 +37,6 @@ class User(db.Model):
     bio = db.Column(db.String(512), nullable = True)
     profile_image = db.Column(db.String(256), nullable = True)
     time_created = db.Column(db.DateTime(), nullable = False)
-
-    def add_to_db(self):
-        self.time_created = datetime.now()
-        db.session.add(self)
-        db.session.commit()
-
-    def remove_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    def update(self, **kwargs):
-        for attr, data in kwargs.items():
-            if hasattr(self, attr):
-                setattr(self, attr, data)
-        db.session.commit()
 
     def verify_password(self, password) -> bool:
         return sha256.verify(password, self.password_hash)
@@ -56,7 +58,7 @@ class User(db.Model):
         return sha256.hash(password)
 
 @dataclass
-class Recipe(db.Model):
+class Recipe(db.Model, EditableDb):
     __tablename__ = 'recipes'
 
     recipe_id: int
@@ -81,21 +83,6 @@ class Recipe(db.Model):
     ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
     images = db.relationship('RecipeImage', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
 
-    def add_to_db(self):
-        self.time_created = datetime.now()
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self, **kwargs):
-        for attr, data in kwargs.items():
-            if hasattr(self, attr):
-                setattr(self, attr, data)
-        db.session.commit()
-
-    def remove_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
-
     @classmethod
     def get_by_id(cls, recipe_id: int):
         return cls.query.filter_by(recipe_id=recipe_id).first()
@@ -106,7 +93,7 @@ class Recipe(db.Model):
 
 
 @dataclass
-class RecipeStep(db.Model):
+class RecipeStep(db.Model, EditableDb):
     __tablename__ = 'recipe_steps'
 
     recipe_id: int
@@ -121,27 +108,12 @@ class RecipeStep(db.Model):
     description = db.Column(db.String(1024), nullable = True)
     time_needed = db.Column(db.Integer, nullable = True)
 
-    def add_to_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self, **kwargs):
-        for attr, data in kwargs.items():
-            if hasattr(self, attr):
-                setattr(self, attr, data)
-        db.session.commit()
-
-    def remove_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
-
     @classmethod
     def get_by_id(cls, recipe_id: int, step_number: int):
         return cls.query.filter_by(recipe_id=recipe_id, step_number=step_number).first()
 
-
 @dataclass
-class RecipeIngredient(db.Model):
+class RecipeIngredient(db.Model, EditableDb):
     __tablename__ = 'recipe_ingredients'
 
     ingredient_id: int
@@ -156,23 +128,9 @@ class RecipeIngredient(db.Model):
     quantity = db.Column(db.Integer, nullable = True)
     unit = db.Column(db.String(32), nullable = True)
 
-    def add_to_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self, **kwargs):
-        for attr, data in kwargs.items():
-            if hasattr(self, attr):
-                setattr(self, attr, data)
-        db.session.commit()
-
-    def remove_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
-
 
 @dataclass
-class RecipeImage(db.Model):
+class RecipeImage(db.Model, EditableDb):
     __tablename__ = 'recipe_images'
 
     image_id: str
@@ -180,14 +138,6 @@ class RecipeImage(db.Model):
 
     image_id = db.Column(db.String(256), primary_key = True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
-
-    def add_to_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def remove_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
 
 
 class RevokedToken(db.Model):

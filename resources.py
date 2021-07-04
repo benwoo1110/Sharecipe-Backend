@@ -176,6 +176,18 @@ class UserProfileImage(Resource):
         return make_response(jsonify(message='Profile picture deleted.'), 200)
 
 
+class UserProfileImageId(Resource):
+    @jwt_required()
+    def get(self, user_id):
+        user = User.get_by_id(user_id)
+        if not user:
+            return make_response(jsonify(message='No users found.'), 404)
+        if not user.profile_image:
+            return make_response(jsonify(message='User does not have a profile picture'), 404)
+
+        return make_response(jsonify(id=user.profile_image), 200)
+
+
 class UserRecipe(Resource):
     @jwt_required()
     def get(self, user_id):

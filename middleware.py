@@ -1,7 +1,7 @@
 import re
 from flask import jsonify, make_response, request
 from flask_jwt_extended.utils import get_jwt_identity
-from models import Recipe, User
+from models import Recipe, RecipeStep, User
 
 
 def get_query_string(key, default=None):
@@ -44,4 +44,21 @@ def get_recipe(func):
         if not recipe:
             return make_response(jsonify(message='No such recipe found.'), 404)
         return func(*args, recipe=recipe, **kwargs)
+    return wrapper
+
+
+def check_recipe_exists(func):
+    def wrapper(*args, **kwargs):
+        if not Recipe.check_exist(kwargs['recipe_id'], kwargs.get('user_id', None)):
+            return make_response(jsonify(message='No such recipe found.'), 404)
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def get_recipe_step(func):
+    def wrapper(*args, **kwargs):
+        recipe_step = RecipeStep.get_by_id(kwargs['recipe_id'], kwargs['step_num'])
+        if not recipe_step:
+            return make_response(jsonify(message='No such recipe step found.'), 404)
+        return func(*args, recipe_step=recipe_step, **kwargs)
     return wrapper

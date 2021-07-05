@@ -90,6 +90,12 @@ class Recipe(db.Model, EditableDb):
         return cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).first()
 
     @classmethod
+    def check_exist(cls, recipe_id: int, user_id: int = None):
+        if not user_id:
+            return db.session.query(cls.query.filter_by(recipe_id=recipe_id).exists()).scalar()
+        return db.session.query(cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).exists()).scalar()
+
+    @classmethod
     def get_by_name(cls, name: str):
         return cls.query.filter(cls.name.startswith(name)).all()
 
@@ -141,6 +147,10 @@ class RecipeImage(db.Model, EditableDb):
 
     image_id = db.Column(db.String(256), primary_key = True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
+
+    @classmethod
+    def get_by_ids(cls, file_ids: set):
+        return cls.query.filter(RecipeImage.image_id in file_ids).all()
 
 
 class RevokedToken(db.Model):

@@ -119,6 +119,20 @@ class TestAPI(unittest.TestCase):
         data = response.json()
         self.assertEqual(data.get('name'), 'Poison')
 
+        # Add a recipe step
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        payload = {'step_number': 3, 'name': 'c', 'description': 'Boil over stove.'}
+        response = requests.put(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}/steps', headers=header, json=payload)
+        data = response.json()
+        self.matchDict(data, recipe_id=recipe_data["recipe_id"], **payload)
+
+        # Get a recipe steps
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}/steps', headers=header, json=payload)
+        data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(data), 3)
+
         # Delete recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}
         response = requests.delete(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)

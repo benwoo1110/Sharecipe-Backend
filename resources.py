@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, create_access_token, create_refresh
 from models import RecipeIngredient, RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 from file_manager import S3FileManager, LocalFileManager
-from middleware import get_account_user_id, get_query_string, get_recipe, get_user, check_account_user
+from middleware import check_recipe_exists, get_account_user_id, get_query_string, get_recipe, get_recipe_step, get_user, check_account_user
 import config
 
 
@@ -35,6 +35,10 @@ recipe_step_parser.add_arg('step_number')
 recipe_step_parser.add_arg('name')
 recipe_step_parser.add_arg('description', required=False)
 recipe_step_parser.add_arg('time_needed', required=False)
+
+
+recipe_image_parser = JsonParser()
+recipe_image_parser.add_arg('image_ids')
 
 
 class HelloWorld(Resource):
@@ -140,9 +144,9 @@ class UserProfileImage(Resource):
     @check_account_user
     @get_user
     def put(self, user_id, user):
-        uploaded_file = request.files['image']
+        uploaded_file = request.files.get("image")
         if not uploaded_file or uploaded_file.filename == '':
-            return make_response(jsonify(message='No image uploaded.'), 404)
+            return make_response(jsonify(message='No image uploaded.'), 400)
         
         #TODO Make sure its a loadable image.
 
@@ -229,45 +233,81 @@ class UserRecipeData(Resource):
         return make_response('', 204)
 
 
-class RecipeStepData(Resource):
+class UserRecipeStep(Resource):
     @jwt_required()
-    def get(self, user_id, recipe_id, step_num):
-        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
-        if not step:
-            return make_response(jsonify(message='No such step found.'), 404)
-
-        return make_response(jsonify(step), 200)
+    @get_recipe
+    def get(self, user_id, recipe_id, recipe):
+        return make_response(jsonify(recipe.steps), 200)
 
     @jwt_required()
     @check_account_user
-    def put(self, user_id, recipe_id, step_num):
-        account_user_id = get_jwt_identity()
-        if account_user_id != user_id:
-            return make_response(jsonify(message='You can only modify your own user data!'), 403)
-
-        data = recipe_parser.parse_args()
-        recipeStep = RecipeStep(recipe_id=recipe_id, step_num=step_num, **data)
+    @check_recipe_exists
+    @recipe_step_parser.parse()
+    def put(self, user_id, recipe_id, parsed_data):
+        recipeStep = RecipeStep(recipe_id=recipe_id, **parsed_data)
         recipeStep.add_to_db()
-
         return make_response(jsonify(recipeStep), 201)
 
-    @jwt_required()
-    @check_account_user
-    def patch(self, user_id, recipe_id, step_num):
-        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
-        if not step:
-            return make_response(jsonify(message='No such step found.'), 404)
 
-        data = recipe_parser.parse_args()
-        step.update(data)
-        return make_response(jsonify(step), 200)
+class UserRecipeStepData(Resource):
+    @jwt_required()
+    @check_recipe_exists
+    @get_recipe_step
+    def get(self, user_id, recipe_id, step_num, recipe_step):
+        return make_response(jsonify(recipe_step), 200)
 
     @jwt_required()
     @check_account_user
-    def delete(self, user_id, recipe_id, step_num):
-        step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
-        if not step:
-            return make_response(jsonify(message='No such step found.'), 404)
+    @check_recipe_exists
+    @get_recipe_step
+    @recipe_step_parser.parse()
+    def patch(self, user_id, recipe_id, step_num, recipe_step, parsed_data):
+        recipe_step.update(parsed_data)
+        return make_response(jsonify(recipe_step), 200)
 
-        step.remove_from_db()
+    @jwt_required()
+    @check_account_user
+    @check_recipe_exists
+    @get_recipe_step
+    def delete(self, user_id, recipe_id, step_num, recipe_step):
+        recipe_step.remove_from_db()
         return make_response('', 204)
+
+
+class UserRecipeImage(Resource):
+    @jwt_required()
+    def get(self, user_id, recipe_id):
+        pass
+
+    @jwt_required()
+    @check_account_user
+    @get_recipe
+    def put(self, user_id, recipe_id, recipe: Recipe):
+        image_files = request.files.getlist("images")
+        if not image_files:
+            return make_response(jsonify(message='No image uploaded.'), 400)
+
+        for image_file in image_files:
+            file_manager.save(image_file)
+            recipe.images.append()
+        recipe.update()
+
+        return make_response(jsonify(recipe.images), 200)
+
+    @jwt_required()
+    @check_account_user
+    @get_recipe
+    @recipe_image_parser.parse()
+    def delete(self, user_id, recipe_id, recipe: Recipe, parsed_data):
+        pass
+
+
+class UserRecipeImageData(Resource):
+    @jwt_required()
+    def get(self, user_id, recipe_id, file_id):
+        pass
+
+    @jwt_required()
+    @check_account_user
+    def delete(self, user_id, recipe_id, file_id):
+        pass

@@ -42,7 +42,10 @@ api.add_resource(resources.UserProfileImage,    '/users/<int:user_id>/profileima
 api.add_resource(resources.UserProfileImageId,  '/users/<int:user_id>/profileimage/id') # GET
 api.add_resource(resources.UserRecipe,          '/users/<int:user_id>/recipes') # GET PUT
 api.add_resource(resources.UserRecipeData,      '/users/<int:user_id>/recipes/<int:recipe_id>') # GET PATCH DELETE
-api.add_resource(resources.RecipeStepData,      '/users/<int:user_id>/recipes/<int:recipe_id>/steps/<int:step_num>') # GET PATCH DELETE
+api.add_resource(resources.UserRecipeStep,      '/users/<int:user_id>/recipes/<int:recipe_id>/steps') # GET PATCH DELETE
+api.add_resource(resources.UserRecipeStepData,  '/users/<int:user_id>/recipes/<int:recipe_id>/steps/<int:step_num>') # GET PATCH DELETE
+api.add_resource(resources.UserRecipeImage,     '/users/<int:user_id>/recipes/<int:recipe_id>/images') # GET PUT DELETE
+api.add_resource(resources.UserRecipeImageData, '/users/<int:user_id>/recipes/<int:recipe_id>/images/<string:file_id>') # GET DELETE
 
 
 if __name__ == "__main__":

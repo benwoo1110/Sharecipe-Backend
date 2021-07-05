@@ -1,10 +1,11 @@
+import zipfile
 from flask import jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
-from models import RecipeIngredient, RecipeStep, User, Recipe, RevokedToken
+from models import RecipeImage, RecipeIngredient, RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 from file_manager import S3FileManager, LocalFileManager
-from middleware import check_recipe_exists, get_account_user_id, get_query_string, get_recipe, get_recipe_step, get_user, check_account_user
+from middleware import check_recipe_exists, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_step, get_user, check_account_user
 import config
 
 
@@ -276,38 +277,57 @@ class UserRecipeStepData(Resource):
 
 class UserRecipeImage(Resource):
     @jwt_required()
-    def get(self, user_id, recipe_id):
-        pass
+    @check_recipe_exists
+    @get_recipe_images
+    def get(self, user_id, recipe_id, recipe_images):
+        zipfolder = zipfile.ZipFile('downloads/images.zip', 'w', compression = zipfile.ZIP_STORED)
+        for recipe_image in recipe_images:
+            zipfolder.write(file_manager.get_local_path(recipe_image.file_id), recipe_image.file_id)
+        zipfolder.close()
+
+        return send_file('downloads/images.zip',  as_attachment = True)
 
     @jwt_required()
     @check_account_user
-    @get_recipe
-    def put(self, user_id, recipe_id, recipe: Recipe):
+    @check_recipe_exists
+    def put(self, user_id, recipe_id):
         image_files = request.files.getlist("images")
         if not image_files:
             return make_response(jsonify(message='No image uploaded.'), 400)
 
         for image_file in image_files:
-            file_manager.save(image_file)
-            recipe.images.append()
-        recipe.update()
-
-        return make_response(jsonify(recipe.images), 200)
+            file_id = file_manager.save(image_file)
+            recipe_image = RecipeImage(file_id=file_id, recipe_id=recipe_id)
+            recipe_image.add_to_db()
+        
+        return make_response('', 204)
 
     @jwt_required()
     @check_account_user
-    @get_recipe
+    @check_recipe_exists
     @recipe_image_parser.parse()
-    def delete(self, user_id, recipe_id, recipe: Recipe, parsed_data):
-        pass
+    def delete(self, user_id, recipe_id, parsed_data):
+        recipe_images = RecipeImage.get_for_ids(set(parsed_data['image_ids']))
+        for recipe_image in recipe_images:
+            file_manager.delete(recipe_image.file_id)
+            recipe_image.remove_from_db()
+
+        return make_response('', 204)
 
 
 class UserRecipeImageData(Resource):
     @jwt_required()
-    def get(self, user_id, recipe_id, file_id):
-        pass
+    @check_recipe_exists
+    @get_recipe_image
+    def get(self, user_id, recipe_id, file_id, recipe_image: RecipeImage):
+        output = file_manager.download(recipe_image.file_id)
+        return make_response(send_file(output, as_attachment=True), 200)
 
     @jwt_required()
     @check_account_user
-    def delete(self, user_id, recipe_id, file_id):
-        pass
+    @check_recipe_exists
+    @get_recipe_image
+    def delete(self, user_id, recipe_id, file_id, recipe_image: RecipeImage):
+        file_manager.delete(recipe_image.file_id)
+        recipe_image.remove_from_db()
+        return make_response('', 204)

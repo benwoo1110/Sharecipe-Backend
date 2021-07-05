@@ -106,7 +106,7 @@ class TestAPI(unittest.TestCase):
         recipe_data = response.json()
         self.matchDict(recipe_data, user_id=user3.user_id, name="Edible food", difficulty=5)
 
-        # Get recipe data
+        # Get recipe data`
         header = {'Authorization': f'Bearer {user3.access_token}'}
         response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)
         data = response.json()
@@ -133,6 +133,24 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(data), 3)
 
+        # Add recipe images
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        test_images = []
+        with open('tests/test1.png', 'rb') as image_file:
+            test_images.append(('images', image_file.read()))
+        with open('tests/test2.png', 'rb') as image_file:
+            test_images.append(('images', image_file.read()))
+        with open('tests/test3.png', 'rb') as image_file:
+            test_images.append(('images', image_file.read()))
+        response = requests.put(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}/images', headers=header, files=test_images)
+
+        # Get recipe images
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}/images', headers=header)
+        self.assertEqual(response.status_code, 200)
+        with open('tests/recipe_images.zip', "wb") as file:
+            file.write(response.content)
+        
         # Delete recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}
         response = requests.delete(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)
@@ -143,9 +161,9 @@ class TestAPI(unittest.TestCase):
         # Upload profile image
         header = {'Authorization': f'Bearer {user2.access_token}'}
         with open('tests/test.png', 'rb') as image_file:
-            test_image = {'image': image_file}
-            response = requests.put(f'{URL}/users/{user2.user_id}/profileimage', headers=header, files=test_image)
-            self.assertEqual(response.status_code, 200)
+            test_image = {'image': image_file.read()}
+        response = requests.put(f'{URL}/users/{user2.user_id}/profileimage', headers=header, files=test_image)
+        self.assertEqual(response.status_code, 200)
 
         # Download profile image
         header = {'Authorization': f'Bearer {user2.access_token}'}

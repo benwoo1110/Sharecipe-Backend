@@ -142,15 +142,27 @@ class RecipeIngredient(db.Model, EditableDb):
 class RecipeImage(db.Model, EditableDb):
     __tablename__ = 'recipe_images'
 
-    image_id: str
+    file_id: str
     recipe_id: int
 
-    image_id = db.Column(db.String(256), primary_key = True)
+    file_id = db.Column(db.String(256), primary_key = True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
 
     @classmethod
-    def get_by_ids(cls, file_ids: set):
-        return cls.query.filter(RecipeImage.image_id in file_ids).all()
+    def get_for_recipe_id(cls, recipe_id: set):
+        return cls.query.filter(RecipeImage.recipe_id == recipe_id).all()
+
+    @classmethod
+    def get_for_ids(cls, file_ids):
+        return cls.query.filter(RecipeImage.file_id in file_ids).all()
+
+    @classmethod
+    def get_by_id(cls, file_id: str, recipe_id: int):
+        return cls.query.filter_by(file_id=file_id, recipe_id=recipe_id).first()
+
+    @classmethod
+    def check_exist(cls, file_id: str, recipe_id: int):
+        return db.session.query(cls.query.filter_by(file_id=file_id, recipe_id=recipe_id).exists()).scalar()
 
 
 class RevokedToken(db.Model):

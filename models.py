@@ -84,8 +84,10 @@ class Recipe(db.Model, EditableDb):
     images = db.relationship('RecipeImage', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
 
     @classmethod
-    def get_by_id(cls, recipe_id: int):
-        return cls.query.filter_by(recipe_id=recipe_id).first()
+    def get_by_id(cls, recipe_id: int, user_id: int = None):
+        if not user_id:
+            return cls.query.filter_by(recipe_id=recipe_id).first()
+        return cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).first()
 
     @classmethod
     def get_by_name(cls, name: str):

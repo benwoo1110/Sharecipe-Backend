@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, create_access_token, create_refresh
 from models import RecipeIngredient, RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 from file_manager import S3FileManager, LocalFileManager
+from middleware import get_account_user_id, get_query_string, get_recipe, get_user, check_account_user
 import config
 
 
@@ -42,15 +43,15 @@ class HelloWorld(Resource):
 
 
 class AccountRegister(Resource):
-    def post(self):
-        data = account_parser.parse_args()
-        if User.get_by_username(data['username']):
+    @account_parser.parse()
+    def post(self, parsed_data):
+        if User.get_by_username(parsed_data['username']):
             return make_response(jsonify(message='Username already exist.'), 400)
 
-        password = data.pop('password')
+        password = parsed_data.pop('password')
         password_hash = User.hash_password(password)
 
-        user = User(password_hash=password_hash, **data)
+        user = User(password_hash=password_hash, **parsed_data)
         user.add_to_db()
 
         access_token = create_access_token(identity=user.user_id)
@@ -60,10 +61,10 @@ class AccountRegister(Resource):
 
 
 class AccountLogin(Resource):
-    def post(self):
-        data = account_parser.parse_args()
-        user = User.get_by_username(data['username'])
-        if not user or not user.verify_password(data['password']):
+    @account_parser.parse()
+    def post(self, parsed_data):
+        user = User.get_by_username(parsed_data['username'])
+        if not user or not user.verify_password(parsed_data['password']):
             return make_response(jsonify(message='Invalid username or password.'), 400)
 
         access_token = create_access_token(identity=user.user_id)
@@ -74,13 +75,10 @@ class AccountLogin(Resource):
 
 class AccountRefresh(Resource):
     @jwt_required(refresh=True)
-    def post(self):
-        user_id = get_jwt_identity()
-        user = User.get_by_id(user_id)
-        if not user:
-            return make_response(jsonify(message='Invalid token. No such user!'), 400)
-
-        access_token = create_access_token(identity=user_id)
+    @get_account_user_id
+    @get_user
+    def post(self, user_id, user):
+        access_token = create_access_token(identity=user.user_id)
         return make_response(jsonify(user_id=user.user_id, access_token=access_token), 200)
 
 
@@ -98,54 +96,40 @@ class AccountLogout(Resource):
 
 class AccountDelete(Resource):
     @jwt_required(refresh=True)
-    def delete(self):
-        user_id = get_jwt_identity()
-        user = User.get_by_id(user_id)
-        if not user:
-            return make_response(jsonify(message='Invalid token. No such user!'), 400)
-
+    @get_account_user_id
+    @get_user
+    def delete(self, user_id, user):
         user.remove_from_db()
         return make_response('', 204)
 
 
 class UserSearch(Resource):
     @jwt_required()
-    def get(self):
-        username = request.args.get('username', '')
+    @get_query_string('username', '')
+    def get(self, username):
         users = User.search_username(username)
         return make_response(jsonify(users), 200)
 
 
 class UserData(Resource):
     @jwt_required()
-    def get(self, user_id):
-        user = User.get_by_id(user_id)
-        if not user:
-            return make_response(jsonify(message='No users found.'), 404)
-    
-        return obj_to_dict(user, 'user_id', 'username', 'bio'), 200
+    @get_user
+    def get(self, user_id, user):
+        return make_response(jsonify(user), 200)
 
     @jwt_required()
-    def patch(self, user_id):
-        account_user_id = get_jwt_identity()
-        if account_user_id != user_id:
-            return make_response(jsonify(message='You can only modify your own user data!'), 403)
-
-        data = user_parser.parse_args()
-        user = User.get_by_id(user_id)
-        if not user:
-            return make_response(jsonify(message='No users found.'), 404)
-
-        user.update(**data)
+    @check_account_user
+    @get_user
+    @user_parser.parse()
+    def patch(self, user_id, user, parsed_data):
+        user.update(**parsed_data)
         return obj_to_dict(user, 'user_id', 'username', 'bio'), 200
 
 
 class UserProfileImage(Resource):
     @jwt_required()
-    def get(self, user_id):
-        user = User.get_by_id(user_id)
-        if not user:
-            return make_response(jsonify(message='No users found.'), 404)
+    @get_user
+    def get(self, user_id, user):
         if not user.profile_image:
             return make_response(jsonify(message='User does not have a profile picture'), 404)
 
@@ -153,32 +137,23 @@ class UserProfileImage(Resource):
         return make_response(send_file(output, as_attachment=True), 200)
 
     @jwt_required()
-    def put(self, user_id):
-        account_user_id = get_jwt_identity()
-        if account_user_id != user_id:
-            return make_response(jsonify(message='You can only modify your own user data!'), 403)
-
-        user = User.get_by_id(user_id)
-        if not user:
-            return make_response(jsonify(message='No users found.'), 404)
-        
+    @check_account_user
+    @get_user
+    def put(self, user_id, user):
         uploaded_file = request.files['image']
         if not uploaded_file or uploaded_file.filename == '':
             return make_response(jsonify(message='No image uploaded.'), 404)
+        
+        #TODO Make sure its a loadable image.
 
         file_id = file_manager.save(uploaded_file)
         user.update(profile_image=file_id)
         return make_response(jsonify(message='Profile picture uploaded.'), 200)
 
     @jwt_required()
-    def delete(self, user_id):
-        account_user_id = get_jwt_identity()
-        if account_user_id != user_id:
-            return make_response(jsonify(message='You can only modify your own user data!'), 403)
-
-        user = User.get_by_id(user_id)
-        if not user:
-            return make_response(jsonify(message='No users found.'), 404)
+    @check_account_user
+    @get_user
+    def delete(self, user_id, user):
         if not user.profile_image:
             return make_response(jsonify(message='Nothing to delete'), 304)
 
@@ -189,10 +164,8 @@ class UserProfileImage(Resource):
 
 class UserProfileImageId(Resource):
     @jwt_required()
-    def get(self, user_id):
-        user = User.get_by_id(user_id)
-        if not user:
-            return make_response(jsonify(message='No users found.'), 404)
+    @get_user
+    def get(self, user_id, user):
         if not user.profile_image:
             return make_response(jsonify(message='User does not have a profile picture'), 404)
 
@@ -205,25 +178,22 @@ class UserRecipe(Resource):
         pass
 
     @jwt_required()
-    def put(self, user_id):
-        account_user_id = get_jwt_identity()
-        if account_user_id != user_id:
-            return make_response(jsonify(message='You can only modify your own user data!'), 403)
-
-        data = recipe_parser.parse_args()
-        if data.get('steps'):
+    @check_account_user
+    @recipe_parser.parse()
+    def put(self, user_id, parsed_data):
+        if parsed_data.get('steps'):
             steps = []
-            for step_data in data.get('steps'):
+            for step_data in parsed_data.get('steps'):
                 steps.append(RecipeStep(**step_data))
-            data['steps'] = steps
+            parsed_data['steps'] = steps
 
-        if data.get('ingredients'):
+        if parsed_data.get('ingredients'):
             ingredients = []
-            for ingredient_data in data.get('ingredients'):
+            for ingredient_data in parsed_data.get('ingredients'):
                 ingredients.append(RecipeIngredient(**ingredient_data))
-            data['ingredients'] = ingredients
+            parsed_data['ingredients'] = ingredients
 
-        recipe = Recipe(user_id=account_user_id, **data)
+        recipe = Recipe(user_id=user_id, **parsed_data)
         recipe.add_to_db()
 
         return make_response(jsonify(recipe), 201)
@@ -231,35 +201,30 @@ class UserRecipe(Resource):
 
 class UserRecipeData(Resource):
     @jwt_required()
-    def get(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(recipe_id)
-        if not recipe or recipe.user_id != user_id:
-            return make_response(jsonify(message='No recipe found.'), 404)
-        
+    @get_recipe
+    def get(self, user_id, recipe_id, recipe):
         return make_response(jsonify(recipe), 200)
 
     @jwt_required()
-    def patch(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(recipe_id)
-        if not recipe or recipe.user_id != user_id:
-            return make_response(jsonify(message='No recipe found.'), 404)
-        
-        data = recipe_parser.parse_args()
-        if data.get('steps'):
+    @check_account_user
+    @get_recipe
+    @recipe_parser.parse()
+    def patch(self, user_id, recipe_id, recipe, parsed_data):
+        if parsed_data.get('steps'):
             steps = []
-            for step_data in data.get('steps'):
+            for step_data in parsed_data.get('steps'):
                 steps.append(RecipeStep(**step_data))
-            data['steps'] = steps
+            parsed_data['steps'] = steps
 
-        recipe.update(**data)
+        #TODO patch ingredients
+
+        recipe.update(**parsed_data)
         return make_response(jsonify(recipe), 200)
 
     @jwt_required()
-    def delete(self, user_id, recipe_id):
-        recipe = Recipe.get_by_id(recipe_id)
-        if not recipe or recipe.user_id != user_id:
-            return make_response(jsonify(message='User not found.'), 404)
-
+    @check_account_user
+    @get_recipe
+    def delete(self, user_id, recipe_id, recipe):
         recipe.remove_from_db()
         return make_response('', 204)
 
@@ -274,6 +239,7 @@ class RecipeStepData(Resource):
         return make_response(jsonify(step), 200)
 
     @jwt_required()
+    @check_account_user
     def put(self, user_id, recipe_id, step_num):
         account_user_id = get_jwt_identity()
         if account_user_id != user_id:
@@ -286,6 +252,7 @@ class RecipeStepData(Resource):
         return make_response(jsonify(recipeStep), 201)
 
     @jwt_required()
+    @check_account_user
     def patch(self, user_id, recipe_id, step_num):
         step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
         if not step:
@@ -296,6 +263,7 @@ class RecipeStepData(Resource):
         return make_response(jsonify(step), 200)
 
     @jwt_required()
+    @check_account_user
     def delete(self, user_id, recipe_id, step_num):
         step: RecipeStep = RecipeStep.get_by_id(recipe_id, step_num)
         if not step:

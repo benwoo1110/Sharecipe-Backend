@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import jsonify
+from flask.helpers import make_response
 from flask.json import JSONEncoder
 from flask_restful import request, abort, Api
 from jwt.exceptions import ExpiredSignatureError
@@ -42,6 +43,31 @@ class JsonParser:
                     parsed_data[arg] = value
 
         return parsed_data
+
+    def parse(self):
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                data = request.get_json() or {}
+                if not data and not self.allow_empty_data:
+                    return make_response(jsonify(message='No data received!'), 400)
+                
+                parsed_data = {}
+
+                for arg, check in self.checks.items():
+                    value = data.get(arg, None)
+                    try:
+                        value = check(value)
+                    except Exception as e:
+                        return make_response(jsonify(message=str(e)), 400)
+                    else:
+                        if value:
+                            parsed_data[arg] = value
+
+                return func(*args, parsed_data=parsed_data, **kwargs)
+
+            return wrapper
+        
+        return decorator
 
 
 class BetterJSONEncoder(JSONEncoder):

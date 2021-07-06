@@ -106,6 +106,12 @@ class TestAPI(unittest.TestCase):
         recipe_data = response.json()
         self.matchDict(recipe_data, user_id=user3.user_id, name="Edible food", difficulty=5)
 
+        # Get all recipe
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/users/{user3.user_id}/recipes', headers=header, json=payload)
+        data = response.json()
+        print(data)
+
         # Get recipe data`
         header = {'Authorization': f'Bearer {user3.access_token}'}
         response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)

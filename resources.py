@@ -159,10 +159,10 @@ class UserProfileImage(Resource):
     @check_account_user
     @get_user
     def delete(self, user_id, user):
-        if not user.profile_image:
+        if not user.profile_image_id:
             return make_response(jsonify(message='Nothing to delete'), 304)
 
-        file_manager.delete(user.profile_image)
+        file_manager.delete(user.profile_image_id)
         user.update(profile_image_id=None)
         return make_response(jsonify(message='Profile picture deleted.'), 200)
 
@@ -171,16 +171,17 @@ class UserProfileImageId(Resource):
     @jwt_required()
     @get_user
     def get(self, user_id, user):
-        if not user.profile_image:
+        if not user.profile_image_id:
             return make_response(jsonify(message='User does not have a profile picture'), 404)
 
-        return make_response(jsonify(id=user.profile_image), 200)
+        return make_response(jsonify(id=user.profile_image_id), 200)
 
 
 class UserRecipe(Resource):
     @jwt_required()
     def get(self, user_id):
-        pass
+        recipes = Recipe.get_for_user_id(user_id)
+        return make_response(jsonify(recipes), 200)
 
     @jwt_required()
     @check_account_user

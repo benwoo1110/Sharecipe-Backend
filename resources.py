@@ -135,10 +135,10 @@ class UserProfileImage(Resource):
     @jwt_required()
     @get_user
     def get(self, user_id, user):
-        if not user.profile_image:
+        if not user.profile_image_id:
             return make_response(jsonify(message='User does not have a profile picture'), 404)
 
-        output = file_manager.download(user.profile_image)
+        output = file_manager.download(user.profile_image_id)
         return make_response(send_file(output, as_attachment=True), 200)
 
     @jwt_required()
@@ -152,7 +152,7 @@ class UserProfileImage(Resource):
         #TODO Make sure its a loadable image.
 
         file_id = file_manager.save(uploaded_file)
-        user.update(profile_image=file_id)
+        user.update(profile_image_id=file_id)
         return make_response(jsonify(message='Profile picture uploaded.'), 200)
 
     @jwt_required()
@@ -163,7 +163,7 @@ class UserProfileImage(Resource):
             return make_response(jsonify(message='Nothing to delete'), 304)
 
         file_manager.delete(user.profile_image)
-        user.update(profile_image=None)
+        user.update(profile_image_id=None)
         return make_response(jsonify(message='Profile picture deleted.'), 200)
 
 

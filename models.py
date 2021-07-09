@@ -1,4 +1,5 @@
 from datetime import datetime
+import typing
 from app import db
 from passlib.hash import pbkdf2_sha256 as sha256
 from dataclasses import dataclass
@@ -158,12 +159,14 @@ class RecipeImage(db.Model, EditableDb):
         return cls.query.filter(RecipeImage.recipe_id == recipe_id).all()
 
     @classmethod
-    def get_for_ids(cls, file_ids):
+    def get_for_ids(cls, file_ids: typing.Union[list, set]):
         return cls.query.filter(RecipeImage.file_id in file_ids).all()
 
     @classmethod
-    def get_by_id(cls, file_id: str, recipe_id: int):
-        return cls.query.filter_by(file_id=file_id, recipe_id=recipe_id).first()
+    def get_by_id(cls, recipe_id: int, file_id: str = None):
+        if file_id:
+            return cls.query.filter_by(file_id=file_id, recipe_id=recipe_id).first()
+        return cls.query.filter_by(recipe_id=recipe_id).first()
 
     @classmethod
     def check_exist(cls, file_id: str, recipe_id: int):

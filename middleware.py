@@ -66,7 +66,7 @@ def get_recipe_step(func):
 
 def get_recipe_image(func):
     def wrapper(*args, **kwargs):
-        recipe_image: RecipeImage = RecipeImage.get_by_id(kwargs['recipe_id'], kwargs['file_id'])
+        recipe_image: RecipeImage = RecipeImage.get_by_id(kwargs['recipe_id'], kwargs.get('file_id', None))
         if not recipe_image:
             return make_response(jsonify(message='No such recipe image found.'), 404)
         return func(*args, recipe_image=recipe_image, **kwargs)

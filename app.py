@@ -46,6 +46,7 @@ api.add_resource(resources.UserRecipeStep,      '/users/<int:user_id>/recipes/<i
 api.add_resource(resources.UserRecipeStepData,  '/users/<int:user_id>/recipes/<int:recipe_id>/steps/<int:step_num>') # GET PATCH DELETE
 api.add_resource(resources.UserRecipeImage,     '/users/<int:user_id>/recipes/<int:recipe_id>/images') # GET PUT DELETE
 api.add_resource(resources.UserRecipeImageData, '/users/<int:user_id>/recipes/<int:recipe_id>/images/<string:file_id>') # GET DELETE
+api.add_resource(resources.UserRecipeIcon,      '/users/<int:user_id>/recipes/<int:recipe_id>/icon') # GET
 
 
 if __name__ == "__main__":

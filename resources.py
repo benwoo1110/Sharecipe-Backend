@@ -332,3 +332,12 @@ class UserRecipeImageData(Resource):
         file_manager.delete(recipe_image.file_id)
         recipe_image.remove_from_db()
         return make_response('', 204)
+
+
+class UserRecipeIcon(Resource):
+    @jwt_required()
+    @check_recipe_exists
+    @get_recipe_image
+    def get(self, user_id: int, recipe_id: int, recipe_image: RecipeImage):
+        output = file_manager.download(recipe_image.file_id)
+        return make_response(send_file(output, as_attachment=True), 200)

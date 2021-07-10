@@ -48,6 +48,8 @@ api.add_resource(resources.UserRecipeImage,     '/users/<int:user_id>/recipes/<i
 api.add_resource(resources.UserRecipeImageData, '/users/<int:user_id>/recipes/<int:recipe_id>/images/<string:file_id>') # GET DELETE
 api.add_resource(resources.UserRecipeIcon,      '/users/<int:user_id>/recipes/<int:recipe_id>/icon') # GET
 
+api.add_resource(resources.Search,      '/search') # GET
+
 
 if __name__ == "__main__":
     app.run(debug=True)

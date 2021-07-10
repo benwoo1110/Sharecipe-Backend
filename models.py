@@ -54,6 +54,11 @@ class User(db.Model, EditableDb):
     def search_username(cls, username):
         return cls.query.filter(cls.username.startswith(username)).all()
 
+    @classmethod
+    def get_all_public(cls, name):
+        q = db.session.query(cls.user_id, cls.username, cls.bio).filter(cls.username.contains(name))
+        return [r._asdict() for r in q.all()]
+
     @staticmethod
     def hash_password(password):
         return sha256.hash(password)
@@ -69,6 +74,7 @@ class Recipe(db.Model, EditableDb):
     difficulty: int
     total_time_needed: int
     time_created: datetime
+    public: bool
     steps: list
     ingredients: list
     images: list
@@ -97,14 +103,19 @@ class Recipe(db.Model, EditableDb):
         return cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).first()
 
     @classmethod
+    def get_by_name(cls, name: str):
+        return cls.query.filter(cls.name.startswith(name)).all()
+
+    @classmethod
+    def get_all_public(cls, name):
+        q = db.session.query(cls.recipe_id, cls.user_id, cls.name).filter(cls.name.contains(name) & cls.public == True)
+        return [r._asdict() for r in q.all()]
+
+    @classmethod
     def check_exist(cls, recipe_id: int, user_id: int = None):
         if not user_id:
             return db.session.query(cls.query.filter_by(recipe_id=recipe_id).exists()).scalar()
         return db.session.query(cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).exists()).scalar()
-
-    @classmethod
-    def get_by_name(cls, name: str):
-        return cls.query.filter(cls.name.startswith(name)).all()
 
 
 @dataclass

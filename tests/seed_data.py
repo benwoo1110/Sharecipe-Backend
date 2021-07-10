@@ -23,7 +23,7 @@ class Account:
 
 
 # Create user
-dummy = Account.add('dummy', '1234', 'Code. Create. Coordinate')
+dummy = Account.add('dummy', '1234', 'Code. Create. Coordinate.')
 header = {'Authorization': f'Bearer {dummy.access_token}'}
 
 

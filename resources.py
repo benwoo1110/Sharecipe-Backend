@@ -1,7 +1,8 @@
+import typing
 import zipfile
 from flask import jsonify, make_response, send_file
 from flask_restful import Resource, request
-from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
 from models import RecipeImage, RecipeIngredient, RecipeStep, User, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 from file_manager import S3FileManager, LocalFileManager
@@ -15,6 +16,7 @@ file_manager = S3FileManager() if config.PRODUCTION_MODE else LocalFileManager()
 account_parser = JsonParser()
 account_parser.add_arg('username')
 account_parser.add_arg('password')
+account_parser.add_arg('bio', required=False)
 
 
 user_parser = JsonParser()
@@ -341,3 +343,14 @@ class UserRecipeIcon(Resource):
     def get(self, user_id: int, recipe_id: int, recipe_image: RecipeImage):
         output = file_manager.download(recipe_image.file_id)
         return make_response(send_file(output, as_attachment=True), 200)
+
+
+class Search(Resource):
+    @jwt_required()
+    @get_query_string('search_string', '')
+    def get(self, search_string: str):
+        result_data = {}
+        result_data["recipes"] = Recipe.get_all_public(search_string)
+        result_data["users"] = User.get_all_public(search_string)
+        return make_response(jsonify(result_data), 200)
+ 

@@ -79,6 +79,7 @@ class Recipe(db.Model, EditableDb):
     portion = db.Column(db.Integer, nullable = True)
     difficulty = db.Column(db.Integer, nullable = True)
     total_time_needed = db.Column(db.Integer, nullable = True)
+    public = db.Column(db.Boolean, unique=False, default=True)
     time_created = db.Column(db.DateTime(), nullable = False)
     steps = db.relationship('RecipeStep', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
     ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")

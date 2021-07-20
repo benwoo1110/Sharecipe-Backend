@@ -59,9 +59,32 @@ class User(db.Model, EditableDb):
         q = db.session.query(cls.user_id, cls.username, cls.bio).filter(cls.username.contains(name))
         return [r._asdict() for r in q.all()]
 
+    @classmethod
+    def check_exist(cls, user_id: int):
+        return db.session.query(cls.query.filter_by(user_id=user_id).exists()).scalar()
+
     @staticmethod
     def hash_password(password):
         return sha256.hash(password)
+
+
+@dataclass
+class UserFollow(db.Model, EditableDb):
+    __tablename__ = 'user_follows'
+
+    user_id: int
+    follow_id: int
+
+    user_id = db.Column(db.Integer, primary_key = True)
+    follow_id = db.Column(db.Integer, primary_key = True)
+
+    @classmethod
+    def get_for_user_id(cls, user_id: int):
+        return cls.query.filter_by(user_id=user_id).all()
+
+    @classmethod
+    def get_by_id(cls, user_id: int, follow_id: int):
+        return cls.query.filter_by(user_id=user_id, follow_id=follow_id).first()
 
 @dataclass
 class Recipe(db.Model, EditableDb):

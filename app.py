@@ -40,6 +40,7 @@ api.add_resource(resources.UserSearch,          '/users') # GET
 api.add_resource(resources.UserData,            '/users/<int:user_id>') # GET PATCH
 api.add_resource(resources.UserProfileImage,    '/users/<int:user_id>/profileimage') # GET PUT
 api.add_resource(resources.UserProfileImageId,  '/users/<int:user_id>/profileimage/id') # GET
+api.add_resource(resources.UserFollowing,       '/users/<int:user_id>/follows') # GET PUT DELETE 
 api.add_resource(resources.UserRecipe,          '/users/<int:user_id>/recipes') # GET PUT
 api.add_resource(resources.UserRecipeData,      '/users/<int:user_id>/recipes/<int:recipe_id>') # GET PATCH DELETE
 api.add_resource(resources.UserRecipeStep,      '/users/<int:user_id>/recipes/<int:recipe_id>/steps') # GET PATCH DELETE

@@ -1,7 +1,7 @@
 import re
 from flask import jsonify, make_response, request
 from flask_jwt_extended.utils import get_jwt_identity
-from models import Recipe, RecipeImage, RecipeStep, User
+from models import Recipe, RecipeImage, RecipeStep, User, UserFollow
 
 
 def get_query_string(key: str, default=None):
@@ -35,6 +35,21 @@ def get_user(func):
         if not user:
             return make_response(jsonify(message='No such user.'), 404)
         return func(*args, user=user, **kwargs)
+    return wrapper
+
+
+def check_user_exists(func):
+    def wrapper(*args, **kwargs):
+        if not User.check_exist(kwargs['user_id']):
+            return make_response(jsonify(message='No such user.'), 404)
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def get_user_follows(func):
+    def wrapper(*args, **kwargs):
+        user_follows: UserFollow = UserFollow.get_for_user_id(kwargs['user_id'])
+        return func(*args, user_follows=user_follows, **kwargs)
     return wrapper
 
 

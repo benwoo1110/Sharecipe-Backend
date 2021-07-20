@@ -3,10 +3,10 @@ import zipfile
 from flask import jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
-from models import RecipeImage, RecipeIngredient, RecipeStep, User, Recipe, RevokedToken
+from models import RecipeImage, RecipeIngredient, RecipeStep, User, UserFollow, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 from file_manager import S3FileManager, LocalFileManager
-from middleware import check_recipe_exists, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_step, get_user, check_account_user
+from middleware import check_recipe_exists, check_user_exists, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_step, get_user, check_account_user, get_user_follows
 import config
 
 
@@ -22,6 +22,10 @@ account_parser.add_arg('bio', required=False)
 user_parser = JsonParser()
 user_parser.add_arg('username')
 user_parser.add_arg('bio')
+
+
+user_follows_parser = JsonParser()
+user_follows_parser.add_arg('follow_id')
 
 
 recipe_parser = JsonParser()
@@ -177,6 +181,32 @@ class UserProfileImageId(Resource):
             return make_response(jsonify(message='User does not have a profile picture'), 404)
 
         return make_response(jsonify(id=user.profile_image_id), 200)
+
+
+class UserFollowing(Resource):
+    @jwt_required()
+    @check_user_exists
+    @get_user_follows
+    def get(self, user_id: int, user_follows: typing.List[UserFollow]):
+        return make_response(jsonify(user_follows), 200)
+
+    @jwt_required()
+    @check_account_user
+    @user_follows_parser.parse()
+    def put(self, user_id: int, parsed_data: dict):
+        user_follow = UserFollow(user_id=user_id, **parsed_data)
+        user_follow.add_to_db()
+        return make_response(jsonify(user_follow), 201)
+
+    @jwt_required()
+    @check_account_user
+    @user_follows_parser.parse()
+    def delete(self, user_id: int, parsed_data: dict):
+        user_follow: UserFollow = UserFollow.get_by_id(user_id, parsed_data['follow_id'])
+        if not user_follow:
+            return make_response(jsonify(message='Not following that user.'), 404)
+        user_follow.remove_from_db()
+        return make_response('', 204)
 
 
 class UserRecipe(Resource):

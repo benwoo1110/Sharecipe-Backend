@@ -75,8 +75,8 @@ class UserFollow(db.Model, EditableDb):
     user_id: int
     follow_id: int
 
-    user_id = db.Column(db.Integer, primary_key = True)
-    follow_id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key = True)
+    follow_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key = True)
 
     @classmethod
     def get_for_user_id(cls, user_id: int):

@@ -103,7 +103,7 @@ class TestAPI(unittest.TestCase):
                 {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
             ]
         }
-        response = requests.put(f'{URL}/users/{user3.user_id}/recipes', headers=header, json=payload)
+        response = requests.put(f'{URL}/recipes', headers=header, json=payload)
         recipe_data = response.json()
         self.matchDict(recipe_data, user_id=user3.user_id, name="Edible food", portion=3, difficulty=5)
         print(recipe_data)

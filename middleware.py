@@ -1,7 +1,7 @@
-import re
+import typing
 from flask import jsonify, make_response, request
 from flask_jwt_extended.utils import get_jwt_identity
-from models import Recipe, RecipeImage, RecipeStep, User, UserFollow
+from models import Recipe, RecipeImage, RecipeLike, RecipeStep, User, UserFollow
 
 
 def get_query_string(key: str, default=None):
@@ -24,8 +24,18 @@ def check_account_user(func):
 
 def get_account_user_id(func):
     def wrapper(*args, **kwargs):
-        user_id: int = get_jwt_identity()
-        return func(*args, user_id=user_id, **kwargs)
+        account_id: int = get_jwt_identity()
+        return func(*args, account_id=account_id, **kwargs)
+    return wrapper
+
+
+def get_account_user(func):
+    def wrapper(*args, **kwargs):
+        account_id: int = get_jwt_identity()
+        user: User = User.get_by_id(account_id)
+        if not user:
+            return make_response(jsonify(message='No such user.'), 404)
+        return func(*args, user=user, **kwargs)
     return wrapper
 
 
@@ -50,6 +60,13 @@ def get_user_follows(func):
     def wrapper(*args, **kwargs):
         user_follows: UserFollow = UserFollow.get_for_user_id(kwargs['user_id'])
         return func(*args, user_follows=user_follows, **kwargs)
+    return wrapper
+
+
+def get_user_likes(func):
+    def wrapper(*args, **kwargs):
+        likes: typing.List[RecipeLike] = RecipeLike.get_for_user_id(kwargs['user_id'])
+        return func(*args, likes=likes, **kwargs)
     return wrapper
 
 
@@ -92,4 +109,20 @@ def get_recipe_images(func):
     def wrapper(*args, **kwargs):
         recipe_images: list = RecipeImage.get_for_recipe_id(kwargs['recipe_id'])
         return func(*args, recipe_images=recipe_images, **kwargs)
+    return wrapper
+
+
+def get_recipe_likes(func):
+    def wrapper(*args, **kwargs):
+        likes: typing.List[RecipeLike] = RecipeLike.get_for_recipe_id(kwargs['recipe_id'])
+        return func(*args, likes=likes, **kwargs)
+    return wrapper
+
+
+def get_recipe_like(func):
+    def wrapper(*args, **kwargs):
+        like: RecipeLike = RecipeLike.get_by_id(kwargs['recipe_id'], kwargs['account_id'])
+        if not like:
+            return make_response(jsonify(message='User did not like that recipe.'), 404)
+        return func(*args, like=like, **kwargs)
     return wrapper

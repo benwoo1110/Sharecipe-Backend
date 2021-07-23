@@ -1,12 +1,12 @@
 import typing
 import zipfile
-from flask import jsonify, make_response, send_file
+from flask import json, jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
-from models import RecipeImage, RecipeIngredient, RecipeStep, User, UserFollow, Recipe, RevokedToken
+from models import RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, User, UserFollow, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 from file_manager import S3FileManager, LocalFileManager
-from middleware import check_recipe_exists, check_user_exists, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_step, get_user, check_account_user, get_user_follows
+from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_user, check_account_user, get_user_follows, get_user_likes
 import config
 
 
@@ -86,9 +86,8 @@ class AccountLogin(Resource):
 
 class AccountRefresh(Resource):
     @jwt_required(refresh=True)
-    @get_account_user_id
-    @get_user
-    def post(self, user_id: int, user: User):
+    @get_account_user
+    def post(self, user: User):
         access_token = create_access_token(identity=user.user_id)
         return make_response(jsonify(user_id=user.user_id, access_token=access_token), 200)
 
@@ -107,9 +106,8 @@ class AccountLogout(Resource):
 
 class AccountDelete(Resource):
     @jwt_required(refresh=True)
-    @get_account_user_id
-    @get_user
-    def delete(self, user_id: int, user: User):
+    @get_account_user
+    def delete(self, user: User):
         user.remove_from_db()
         return make_response('', 204)
 
@@ -207,6 +205,14 @@ class UserFollowing(Resource):
             return make_response(jsonify(message='Not following that user.'), 404)
         user_follow.remove_from_db()
         return make_response('', 204)
+
+
+class UserLike(Resource):
+    @jwt_required()
+    @check_user_exists
+    @get_user_likes
+    def get(self, user_id: int, likes: typing.List[RecipeLike]):
+        return make_response(jsonify(likes), 200)
 
 
 class UserRecipe(Resource):
@@ -373,6 +379,31 @@ class UserRecipeIcon(Resource):
     def get(self, user_id: int, recipe_id: int, recipe_image: RecipeImage):
         output = file_manager.download(recipe_image.file_id)
         return make_response(send_file(output, as_attachment=True), 200)
+
+
+class UserRecipeLike(Resource):
+    @jwt_required()
+    @check_user_exists
+    @check_recipe_exists
+    @get_recipe_likes
+    def get(self, user_id: int, recipe_id: int, likes: typing.List[RecipeLike]):
+        return make_response(jsonify(RecipeLike), 200)
+
+    @jwt_required() 
+    @get_account_user_id
+    @check_recipe_exists
+    def put(self, user_id: int, recipe_id: int, account_id: int):
+        new_like = RecipeLike(recipe_id=recipe_id, user_id=account_id)
+        new_like.add_to_db()
+        return make_response(jsonify(new_like), 200)
+
+    @jwt_required()
+    @get_account_user_id
+    @check_recipe_exists
+    @get_recipe_like
+    def delete(self, user_id: int, recipe_id: int, account_id: int, like: RecipeLike):
+        like.remove_from_db()
+        return make_response('', 204)
 
 
 class Search(Resource):

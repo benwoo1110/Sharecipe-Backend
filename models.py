@@ -208,6 +208,29 @@ class RecipeImage(db.Model, EditableDb):
         return db.session.query(cls.query.filter_by(file_id=file_id, recipe_id=recipe_id).exists()).scalar()
 
 
+@dataclass
+class RecipeLike(db.Model, EditableDb):
+    __tablename__ = 'recipe_likes'
+
+    recipe_id: int
+    user_id: int
+
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key = True)
+
+    @classmethod
+    def get_for_recipe_id(cls, recipe_id: int):
+        return cls.query.filter_by(recipe_id=recipe_id).all()
+
+    @classmethod
+    def get_for_user_id(cls, user_id: int):
+        return cls.query.filter_by(user_id=user_id).all()
+
+    @classmethod
+    def get_by_id(cls, recipe_id: int, user_id: int):
+        return cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).all()
+
+
 class RevokedToken(db.Model):
     __tablename__ = 'revoked_tokens'
     id = db.Column(db.Integer, primary_key = True)

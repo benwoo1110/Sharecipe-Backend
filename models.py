@@ -157,6 +157,10 @@ class RecipeStep(db.Model, EditableDb):
     time_needed = db.Column(db.Integer, nullable = True)
 
     @classmethod
+    def get_for_recipe_id(cls, recipe_id: int):
+        return cls.query.filter_by(recipe_id=recipe_id).all()
+
+    @classmethod
     def get_by_id(cls, recipe_id: int, step_number: int):
         return cls.query.filter_by(recipe_id=recipe_id, step_number=step_number).first()
 

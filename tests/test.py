@@ -116,27 +116,27 @@ class TestAPI(unittest.TestCase):
 
         # Get recipe data`
         header = {'Authorization': f'Bearer {user3.access_token}'}
-        response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)
+        response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}', headers=header)
         data = response.json()
         self.assertDictEqual(data, recipe_data)
 
         # Update recipe data
         header = {'Authorization': f'Bearer {user3.access_token}'}
         payload = {'name': 'Poison'}
-        response = requests.patch(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header, json=payload)
+        response = requests.patch(f'{URL}/recipes/{recipe_data["recipe_id"]}', headers=header, json=payload)
         data = response.json()
         self.assertEqual(data.get('name'), 'Poison')
 
         # Add a recipe step
         header = {'Authorization': f'Bearer {user3.access_token}'}
         payload = {'step_number': 3, 'name': 'c', 'description': 'Boil over stove.'}
-        response = requests.put(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}/steps', headers=header, json=payload)
+        response = requests.put(f'{URL}/recipes/{recipe_data["recipe_id"]}/steps', headers=header, json=payload)
         data = response.json()
         self.matchDict(data, recipe_id=recipe_data["recipe_id"], **payload)
 
         # Get a recipe steps
         header = {'Authorization': f'Bearer {user3.access_token}'}
-        response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}/steps', headers=header, json=payload)
+        response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}/steps', headers=header, json=payload)
         data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(data), 3)
@@ -150,20 +150,20 @@ class TestAPI(unittest.TestCase):
             test_images.append(('images', image_file.read()))
         with open('tests/test3.png', 'rb') as image_file:
             test_images.append(('images', image_file.read()))
-        response = requests.put(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}/images', headers=header, files=test_images)
+        response = requests.put(f'{URL}/recipes/{recipe_data["recipe_id"]}/images', headers=header, files=test_images)
 
         # Get recipe images
         header = {'Authorization': f'Bearer {user3.access_token}'}
-        response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}/images', headers=header)
+        response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}/images', headers=header)
         self.assertEqual(response.status_code, 200)
         with open('tests/recipe_images.zip', "wb") as file:
             file.write(response.content)
         
         # Delete recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}
-        response = requests.delete(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)
+        response = requests.delete(f'{URL}/recipes/{recipe_data["recipe_id"]}', headers=header)
         self.assertEqual(response.status_code, 204)
-        response = requests.get(f'{URL}/users/{user3.user_id}/recipes/{recipe_data["recipe_id"]}', headers=header)
+        response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}', headers=header)
         self.assertEqual(response.status_code, 404)
 
         # Upload profile image

@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required, create_access_token, create_refresh
 from models import RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, User, UserFollow, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict
 from file_manager import S3FileManager, LocalFileManager
-from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_user, check_account_user, get_user_follows, get_user_likes
+from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
 import config
 
 
@@ -135,7 +135,7 @@ class UserData(Resource):
         return make_response(jsonify(user), 200)
 
     @jwt_required()
-    @check_account_user
+    @validate_account_user
     @get_user
     @user_parser.parse()
     def patch(self, user_id: int, user: User, parsed_data: dict):
@@ -154,7 +154,7 @@ class UserProfileImage(Resource):
         return make_response(send_file(output, as_attachment=True), 200)
 
     @jwt_required()
-    @check_account_user
+    @validate_account_user
     @get_user
     def put(self, user_id: int, user: User):
         uploaded_file = request.files.get("image")
@@ -168,7 +168,7 @@ class UserProfileImage(Resource):
         return make_response(jsonify(message='Profile picture uploaded.'), 200)
 
     @jwt_required()
-    @check_account_user
+    @validate_account_user
     @get_user
     def delete(self, user_id: int, user: User):
         if not user.profile_image_id:
@@ -197,7 +197,7 @@ class UserFollows(Resource):
         return make_response(jsonify(user_follows), 200)
 
     @jwt_required()
-    @check_account_user
+    @validate_account_user
     @user_follows_parser.parse()
     def put(self, user_id: int, parsed_data: dict):
         user_follow = UserFollow(user_id=user_id, **parsed_data)
@@ -205,7 +205,7 @@ class UserFollows(Resource):
         return make_response(jsonify(user_follow), 201)
 
     @jwt_required()
-    @check_account_user
+    @validate_account_user
     @user_follows_parser.parse()
     def delete(self, user_id: int, parsed_data: dict):
         user_follow: UserFollow = UserFollow.get_by_id(user_id, parsed_data['follow_id'])
@@ -215,22 +215,22 @@ class UserFollows(Resource):
         return make_response('', 204)
 
 
-class UserLikes(Resource):
+class UserRecipeLikes(Resource):
     @jwt_required()
     @check_user_exists
-    @get_user_likes
+    @get_user_recipe_likes
     def get(self, user_id: int, likes: typing.List[RecipeLike]):
         return make_response(jsonify(likes), 200)
 
 
 class UserRecipes(Resource):
     @jwt_required()
-    def get(self, user_id: int):
-        recipes = Recipe.get_for_user_id(user_id)
+    @get_user_recipes
+    def get(self, user_id: int, recipes: typing.List[dict]):
         return make_response(jsonify(recipes), 200)
 
     @jwt_required()
-    @check_account_user
+    @validate_account_user
     @recipe_parser.parse()
     def put(self, user_id: int, parsed_data: dict):
         if parsed_data.get('steps'):
@@ -251,17 +251,24 @@ class UserRecipes(Resource):
         return make_response(jsonify(recipe), 201)
 
 
-class UserRecipeData(Resource):
+class Recipes(Resource):
+    @jwt_required()
+    def get(self):
+        #TODO
+        pass
+
+
+class RecipeData(Resource):
     @jwt_required()
     @get_recipe
-    def get(self, user_id: int, recipe_id: int, recipe: Recipe):
+    def get(self, recipe_id: int, recipe: Recipe):
         return make_response(jsonify(recipe), 200)
 
     @jwt_required()
-    @check_account_user
+    @validate_account_recipe
     @get_recipe
     @recipe_parser.parse()
-    def patch(self, user_id: int, recipe_id: int, recipe: Recipe, parsed_data: dict):
+    def patch(self, recipe_id: int, recipe: Recipe, parsed_data: dict):
         if parsed_data.get('steps'):
             steps = []
             for step_data in parsed_data.get('steps'):
@@ -274,59 +281,56 @@ class UserRecipeData(Resource):
         return make_response(jsonify(recipe), 200)
 
     @jwt_required()
-    @check_account_user
+    @validate_account_recipe
     @get_recipe
-    def delete(self, user_id: int, recipe_id: int, recipe: Recipe):
+    def delete(self, recipe_id: int, recipe: Recipe):
         recipe.remove_from_db()
         return make_response('', 204)
 
 
-class UserRecipeSteps(Resource):
+class RecipeSteps(Resource):
     @jwt_required()
-    @get_recipe
-    def get(self, user_id: int, recipe_id: int, recipe: Recipe):
-        return make_response(jsonify(recipe.steps), 200)
+    @get_recipe_steps
+    def get(self, recipe_id: int, recipe_steps: typing.List[RecipeStep]):
+        return make_response(jsonify(recipe_steps), 200)
 
     @jwt_required()
-    @check_account_user
-    @check_recipe_exists
+    @validate_account_recipe
     @recipe_step_parser.parse()
-    def put(self, user_id: int, recipe_id: int, parsed_data: dict):
+    def put(self, recipe_id: int, parsed_data: dict):
         recipeStep = RecipeStep(recipe_id=recipe_id, **parsed_data)
         recipeStep.add_to_db()
         return make_response(jsonify(recipeStep), 201)
 
 
-class UserRecipeStepData(Resource):
+class RecipeStepData(Resource):
     @jwt_required()
     @check_recipe_exists
     @get_recipe_step
-    def get(self, user_id: int, recipe_id: int, step_num: int, recipe_step: RecipeStep):
+    def get(self, recipe_id: int, step_num: int, recipe_step: RecipeStep):
         return make_response(jsonify(recipe_step), 200)
 
     @jwt_required()
-    @check_account_user
-    @check_recipe_exists
+    @validate_account_recipe
     @get_recipe_step
     @recipe_step_parser.parse()
-    def patch(self, user_id: int, recipe_id: int, step_num: int, recipe_step: RecipeStep, parsed_data: dict):
+    def patch(self, recipe_id: int, step_num: int, recipe_step: RecipeStep, parsed_data: dict):
         recipe_step.update(parsed_data)
         return make_response(jsonify(recipe_step), 200)
 
     @jwt_required()
-    @check_account_user
-    @check_recipe_exists
+    @validate_account_recipe
     @get_recipe_step
-    def delete(self, user_id: int, recipe_id: int, step_num: int, recipe_step: RecipeStep):
+    def delete(self, recipe_id: int, step_num: int, recipe_step: RecipeStep):
         recipe_step.remove_from_db()
         return make_response('', 204)
 
 
-class UserRecipeImages(Resource):
+class RecipeImages(Resource):
     @jwt_required()
     @check_recipe_exists
     @get_recipe_images
-    def get(self, user_id: int, recipe_id: int, recipe_images: list):
+    def get(self, recipe_id: int, recipe_images: list):
         zipfolder = zipfile.ZipFile('downloads/images.zip', 'w', compression = zipfile.ZIP_STORED)
         for recipe_image in recipe_images:
             zipfolder.write(file_manager.get_local_path(recipe_image.file_id), recipe_image.file_id)
@@ -335,9 +339,8 @@ class UserRecipeImages(Resource):
         return send_file('downloads/images.zip',  as_attachment = True)
 
     @jwt_required()
-    @check_account_user
-    @check_recipe_exists
-    def put(self, user_id: int, recipe_id: int):
+    @validate_account_recipe
+    def put(self, recipe_id: int):
         image_files = request.files.getlist("images")
         if not image_files:
             return make_response(jsonify(message='No image uploaded.'), 400)
@@ -350,10 +353,9 @@ class UserRecipeImages(Resource):
         return make_response('', 204)
 
     @jwt_required()
-    @check_account_user
-    @check_recipe_exists
+    @validate_account_recipe
     @recipe_image_parser.parse()
-    def delete(self, user_id: int, recipe_id: int, parsed_data: dict):
+    def delete(self, recipe_id: int, parsed_data: dict):
         recipe_images = RecipeImage.get_for_ids(set(parsed_data['image_ids']))
         for recipe_image in recipe_images:
             file_manager.delete(recipe_image.file_id)
@@ -362,45 +364,43 @@ class UserRecipeImages(Resource):
         return make_response('', 204)
 
 
-class UserRecipeImageData(Resource):
+class RecipeImageData(Resource):
     @jwt_required()
     @check_recipe_exists
     @get_recipe_image
-    def get(self, user_id: int, recipe_id: int, file_id: str, recipe_image: RecipeImage):
+    def get(self, recipe_id: int, file_id: str, recipe_image: RecipeImage):
         output = file_manager.download(recipe_image.file_id)
         return make_response(send_file(output, as_attachment=True), 200)
 
     @jwt_required()
-    @check_account_user
-    @check_recipe_exists
+    @validate_account_recipe
     @get_recipe_image
-    def delete(self, user_id: int, recipe_id: int, file_id: str, recipe_image: RecipeImage):
+    def delete(self, recipe_id: int, file_id: str, recipe_image: RecipeImage):
         file_manager.delete(recipe_image.file_id)
         recipe_image.remove_from_db()
         return make_response('', 204)
 
 
-class UserRecipeIcon(Resource):
+class RecipeIcon(Resource):
     @jwt_required()
     @check_recipe_exists
     @get_recipe_image
-    def get(self, user_id: int, recipe_id: int, recipe_image: RecipeImage):
+    def get(self, recipe_id: int, recipe_image: RecipeImage):
         output = file_manager.download(recipe_image.file_id)
         return make_response(send_file(output, as_attachment=True), 200)
 
 
-class UserRecipeLikes(Resource):
+class RecipeLikes(Resource):
     @jwt_required()
-    @check_user_exists
     @check_recipe_exists
     @get_recipe_likes
-    def get(self, user_id: int, recipe_id: int, likes: typing.List[RecipeLike]):
+    def get(self, recipe_id: int, likes: typing.List[RecipeLike]):
         return make_response(jsonify(RecipeLike), 200)
 
     @jwt_required() 
     @get_account_user_id
     @check_recipe_exists
-    def put(self, user_id: int, recipe_id: int, account_id: int):
+    def put(self, recipe_id: int, account_id: int):
         new_like = RecipeLike(recipe_id=recipe_id, user_id=account_id)
         new_like.add_to_db()
         return make_response(jsonify(new_like), 200)
@@ -409,7 +409,7 @@ class UserRecipeLikes(Resource):
     @get_account_user_id
     @check_recipe_exists
     @get_recipe_like
-    def delete(self, user_id: int, recipe_id: int, account_id: int, like: RecipeLike):
+    def delete(self, recipe_id: int, account_id: int, like: RecipeLike):
         like.remove_from_db()
         return make_response('', 204)
 
@@ -418,7 +418,7 @@ class Search(Resource):
     @jwt_required()
     @get_query_string('search_string', '')
     def get(self, search_string: str):
-        
+
         #TODO Search by categories 
 
         result_data = {}

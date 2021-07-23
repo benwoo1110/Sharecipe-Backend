@@ -41,16 +41,17 @@ api.add_resource(resources.UserData,            '/users/<int:user_id>') # GET PA
 api.add_resource(resources.UserProfileImage,    '/users/<int:user_id>/profileimage') # GET PUT
 api.add_resource(resources.UserProfileImageId,  '/users/<int:user_id>/profileimage/id') # GET
 api.add_resource(resources.UserFollows,         '/users/<int:user_id>/follows') # GET PUT DELETE 
-
-api.add_resource(resources.UserLikes,           '/users/<int:user_id>/recipes/likes') # GET
 api.add_resource(resources.UserRecipes,         '/users/<int:user_id>/recipes') # GET PUT
-api.add_resource(resources.UserRecipeData,      '/users/<int:user_id>/recipes/<int:recipe_id>') # GET PATCH DELETE
-api.add_resource(resources.UserRecipeSteps,     '/users/<int:user_id>/recipes/<int:recipe_id>/steps') # GET PATCH DELETE
-api.add_resource(resources.UserRecipeStepData,  '/users/<int:user_id>/recipes/<int:recipe_id>/steps/<int:step_num>') # GET PATCH DELETE
-api.add_resource(resources.UserRecipeImages,    '/users/<int:user_id>/recipes/<int:recipe_id>/images') # GET PUT DELETE
-api.add_resource(resources.UserRecipeImageData, '/users/<int:user_id>/recipes/<int:recipe_id>/images/<string:file_id>') # GET DELETE
-api.add_resource(resources.UserRecipeIcon,      '/users/<int:user_id>/recipes/<int:recipe_id>/icon') # GET
-api.add_resource(resources.UserRecipeLikes,     '/users/<int:user_id>/recipes/<int:recipe_id>/likes') # GET PUT DELETE
+api.add_resource(resources.UserRecipeLikes,     '/users/<int:user_id>/recipes/likes') # GET
+
+api.add_resource(resources.Recipes,             '/recipes') # GET PUT
+api.add_resource(resources.RecipeData,          '/recipes/<int:recipe_id>') # GET PATCH DELETE
+api.add_resource(resources.RecipeSteps,         '/recipes/<int:recipe_id>/steps') # GET PATCH DELETE
+api.add_resource(resources.RecipeStepData,      '/recipes/<int:recipe_id>/steps/<int:step_num>') # GET PATCH DELETE
+api.add_resource(resources.RecipeImages,        '/recipes/<int:recipe_id>/images') # GET PUT DELETE
+api.add_resource(resources.RecipeImageData,     '/recipes/<int:recipe_id>/images/<string:file_id>') # GET DELETE
+api.add_resource(resources.RecipeIcon,          '/recipes/<int:recipe_id>/icon') # GET
+api.add_resource(resources.RecipeLikes,         '/recipes/<int:recipe_id>/likes') # GET PUT DELETE
 
 api.add_resource(resources.Search,              '/search') # GET
 

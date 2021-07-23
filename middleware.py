@@ -13,15 +13,6 @@ def get_query_string(key: str, default=None):
     return decorator
 
 
-def check_account_user(func):
-    def wrapper(*args, **kwargs):
-        account_user_id: int = get_jwt_identity()
-        if account_user_id != kwargs['user_id']:
-            return make_response(jsonify(message='You can only modify your own user data!'), 403)
-        return func(*args, **kwargs)
-    return wrapper
-
-
 def get_account_user_id(func):
     def wrapper(*args, **kwargs):
         account_id: int = get_jwt_identity()
@@ -36,6 +27,24 @@ def get_account_user(func):
         if not user:
             return make_response(jsonify(message='No such user.'), 404)
         return func(*args, user=user, **kwargs)
+    return wrapper
+
+
+def validate_account_user(func):
+    def wrapper(*args, **kwargs):
+        account_user_id: int = get_jwt_identity()
+        if account_user_id != kwargs['user_id']:
+            return make_response(jsonify(message='You can only modify your own user data!'), 403)
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def validate_account_recipe(func):
+    def wrapper(*args, **kwargs):
+        account_user_id: int = get_jwt_identity()
+        if not Recipe.check_exist(kwargs['recipe_id'], account_user_id):
+            return make_response(jsonify(message='You can only modify your own recipe data!'), 403)
+        return func(*args, **kwargs)
     return wrapper
 
 
@@ -63,7 +72,14 @@ def get_user_follows(func):
     return wrapper
 
 
-def get_user_likes(func):
+def get_user_recipes(func):
+    def wrapper(*args, **kwargs):
+        recipes: typing.List[dict] = Recipe.get_for_user_id(kwargs['user_id'])
+        return func(*args, recipes=recipes, **kwargs)
+    return wrapper
+
+
+def get_user_recipe_likes(func):
     def wrapper(*args, **kwargs):
         likes: typing.List[RecipeLike] = RecipeLike.get_for_user_id(kwargs['user_id'])
         return func(*args, likes=likes, **kwargs)
@@ -72,7 +88,7 @@ def get_user_likes(func):
 
 def get_recipe(func):
     def wrapper(*args, **kwargs):
-        recipe: Recipe = Recipe.get_by_id(kwargs['recipe_id'], kwargs.get('user_id', None))
+        recipe: Recipe = Recipe.get_by_id(kwargs['recipe_id'])
         if not recipe:
             return make_response(jsonify(message='No such recipe found.'), 404)
         return func(*args, recipe=recipe, **kwargs)
@@ -81,9 +97,16 @@ def get_recipe(func):
 
 def check_recipe_exists(func):
     def wrapper(*args, **kwargs):
-        if not Recipe.check_exist(kwargs['recipe_id'], kwargs.get('user_id', None)):
+        if not Recipe.check_exist(kwargs['recipe_id']):
             return make_response(jsonify(message='No such recipe found.'), 404)
         return func(*args, **kwargs)
+    return wrapper
+
+
+def get_recipe_steps(func):
+    def wrapper(*args, **kwargs):
+        recipe_steps = RecipeStep.get_for_recipe_id(kwargs['recipe_id'])
+        return func(*args, recipe_steps=recipe_steps, **kwargs)
     return wrapper
 
 
@@ -96,19 +119,19 @@ def get_recipe_step(func):
     return wrapper
 
 
+def get_recipe_images(func):
+    def wrapper(*args, **kwargs):
+        recipe_images: list = RecipeImage.get_for_recipe_id(kwargs['recipe_id'])
+        return func(*args, recipe_images=recipe_images, **kwargs)
+    return wrapper
+
+
 def get_recipe_image(func):
     def wrapper(*args, **kwargs):
         recipe_image: RecipeImage = RecipeImage.get_by_id(kwargs['recipe_id'], kwargs.get('file_id', None))
         if not recipe_image:
             return make_response(jsonify(message='No such recipe image found.'), 404)
         return func(*args, recipe_image=recipe_image, **kwargs)
-    return wrapper
-
-
-def get_recipe_images(func):
-    def wrapper(*args, **kwargs):
-        recipe_images: list = RecipeImage.get_for_recipe_id(kwargs['recipe_id'])
-        return func(*args, recipe_images=recipe_images, **kwargs)
     return wrapper
 
 

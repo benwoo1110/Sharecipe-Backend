@@ -51,13 +51,12 @@ class User(db.Model, EditableDb):
         return cls.query.filter_by(username = username).first()
 
     @classmethod
-    def search_username(cls, username):
-        return cls.query.filter(cls.username.startswith(username)).all()
+    def get_all_of_ids(cls, user_ids: list):
+        return cls.query.filter(not user_ids or cls.user_id in user_ids).all()
 
     @classmethod
     def get_all_public(cls, name):
-        q = db.session.query(cls.user_id, cls.username, cls.bio).filter(cls.username.contains(name))
-        return [r._asdict() for r in q.all()]
+        return cls.query.filter(cls.username.contains(name)).all()
 
     @classmethod
     def check_exist(cls, user_id: int):

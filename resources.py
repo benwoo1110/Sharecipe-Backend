@@ -19,6 +19,10 @@ account_parser.add_arg('password')
 account_parser.add_arg('bio', required=False)
 
 
+users_parser = JsonParser()
+users_parser.add_arg('user_ids', required=False)
+
+
 user_parser = JsonParser()
 user_parser.add_arg('username')
 user_parser.add_arg('bio')
@@ -26,6 +30,10 @@ user_parser.add_arg('bio')
 
 user_follows_parser = JsonParser()
 user_follows_parser.add_arg('follow_id')
+
+
+recipes_parser = JsonParser()
+recipes_parser.add_arg('recipe_ids', required=False)
 
 
 recipe_parser = JsonParser()
@@ -112,11 +120,11 @@ class AccountDelete(Resource):
         return make_response('', 204)
 
 
-class UserSearch(Resource):
+class Users(Resource):
     @jwt_required()
-    @get_query_string('username', '')
-    def get(self, username: str):
-        users = User.search_username(username)
+    @users_parser.parse()
+    def get(self, parsed_data: dict):
+        users = User.get_all_of_ids(parsed_data.get('user_ids', None))
         return make_response(jsonify(users), 200)
 
 
@@ -181,7 +189,7 @@ class UserProfileImageId(Resource):
         return make_response(jsonify(id=user.profile_image_id), 200)
 
 
-class UserFollowing(Resource):
+class UserFollows(Resource):
     @jwt_required()
     @check_user_exists
     @get_user_follows
@@ -207,7 +215,7 @@ class UserFollowing(Resource):
         return make_response('', 204)
 
 
-class UserLike(Resource):
+class UserLikes(Resource):
     @jwt_required()
     @check_user_exists
     @get_user_likes
@@ -215,7 +223,7 @@ class UserLike(Resource):
         return make_response(jsonify(likes), 200)
 
 
-class UserRecipe(Resource):
+class UserRecipes(Resource):
     @jwt_required()
     def get(self, user_id: int):
         recipes = Recipe.get_for_user_id(user_id)
@@ -273,7 +281,7 @@ class UserRecipeData(Resource):
         return make_response('', 204)
 
 
-class UserRecipeStep(Resource):
+class UserRecipeSteps(Resource):
     @jwt_required()
     @get_recipe
     def get(self, user_id: int, recipe_id: int, recipe: Recipe):
@@ -314,7 +322,7 @@ class UserRecipeStepData(Resource):
         return make_response('', 204)
 
 
-class UserRecipeImage(Resource):
+class UserRecipeImages(Resource):
     @jwt_required()
     @check_recipe_exists
     @get_recipe_images
@@ -381,7 +389,7 @@ class UserRecipeIcon(Resource):
         return make_response(send_file(output, as_attachment=True), 200)
 
 
-class UserRecipeLike(Resource):
+class UserRecipeLikes(Resource):
     @jwt_required()
     @check_user_exists
     @check_recipe_exists
@@ -410,6 +418,9 @@ class Search(Resource):
     @jwt_required()
     @get_query_string('search_string', '')
     def get(self, search_string: str):
+        
+        #TODO Search by categories 
+
         result_data = {}
         result_data["recipes"] = Recipe.get_all_public(search_string)
         result_data["users"] = User.get_all_public(search_string)

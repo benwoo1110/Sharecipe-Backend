@@ -394,7 +394,7 @@ class RecipeLikes(Resource):
     @check_recipe_exists
     @get_recipe_likes
     def get(self, recipe_id: int, likes: typing.List[RecipeLike]):
-        return make_response(jsonify(RecipeLike), 200)
+        return make_response(jsonify(likes), 200)
 
     @jwt_required() 
     @get_account_user_id
@@ -402,7 +402,7 @@ class RecipeLikes(Resource):
     def put(self, recipe_id: int, account_id: int):
         new_like = RecipeLike(recipe_id=recipe_id, user_id=account_id)
         new_like.add_to_db()
-        return make_response(jsonify(new_like), 200)
+        return make_response(jsonify(new_like), 201)
 
     @jwt_required()
     @get_account_user_id

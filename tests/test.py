@@ -122,13 +122,11 @@ class TestAPI(unittest.TestCase):
         response = requests.put(f'{URL}/recipes', headers=header, json=payload)
         recipe_data = response.json()
         self.matchDict(recipe_data, user_id=user3.user_id, name="Edible food", portion=3, difficulty=5)
-        print(recipe_data)
 
         # Get all recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}
         response = requests.get(f'{URL}/users/{user3.user_id}/recipes', headers=header, json=payload)
         data = response.json()
-        print(data)
 
         # Get recipe data`
         header = {'Authorization': f'Bearer {user3.access_token}'}
@@ -174,7 +172,42 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         with open('tests/recipe_images.zip', "wb") as file:
             file.write(response.content)
+
+        # User like recipe
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.put(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes', headers=header)
+        self.assertEqual(response.status_code, 201)
+
+        # Another user like recipe
+        header = {'Authorization': f'Bearer {user2.access_token}'}
+        response = requests.put(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes', headers=header)
+        self.assertEqual(response.status_code, 201)
+
+        # Get user likes
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/users/{user1.user_id}/recipes/likes', headers=header)
+        like_data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(like_data), 1)
         
+        # Get recipe likes
+        response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes', headers=header)
+        like_data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(like_data), 2)
+
+        # User unlike recipe
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.delete(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes', headers=header)
+        self.assertEqual(response.status_code, 204)
+
+        # User doesnt have likes
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/users/{user1.user_id}/recipes/likes', headers=header)
+        like_data = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(like_data), 0)
+
         # Delete recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}
         response = requests.delete(f'{URL}/recipes/{recipe_data["recipe_id"]}', headers=header)

@@ -231,7 +231,7 @@ class RecipeLike(db.Model, EditableDb):
 
     @classmethod
     def get_by_id(cls, recipe_id: int, user_id: int):
-        return cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).all()
+        return cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).first()
 
 
 class RevokedToken(db.Model):

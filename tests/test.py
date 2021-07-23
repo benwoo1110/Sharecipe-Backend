@@ -88,6 +88,22 @@ class TestAPI(unittest.TestCase):
         data = response.json()
         self.matchDict(data, user_id=user1.user_id, username="totallyNotAdmin", bio="Code. Create. Coordinate.")
 
+        # Follow another user
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        payload = {'follow_id': user2.user_id}
+        response = requests.put(f'{URL}/users/{user1.user_id}/follows', headers=header,  json=payload)
+
+        # Follow a second user
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        payload = {'follow_id': user3.user_id}
+        response = requests.put(f'{URL}/users/{user1.user_id}/follows', headers=header,  json=payload)
+
+        # Get user follows
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/users/{user1.user_id}/follows', headers=header)
+        follows_data = response.json()
+        self.assertEqual(len(follows_data), 2)
+
         # Create new recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}
         payload = {

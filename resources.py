@@ -215,6 +215,13 @@ class UserFollows(Resource):
         return make_response('', 204)
 
 
+class UserRecipes(Resource):
+    @jwt_required()
+    @get_user_recipes
+    def get(self, user_id: int, recipes: typing.List[dict]):
+        return make_response(jsonify(recipes), 200)
+
+
 class UserRecipeLikes(Resource):
     @jwt_required()
     @check_user_exists
@@ -223,16 +230,15 @@ class UserRecipeLikes(Resource):
         return make_response(jsonify(likes), 200)
 
 
-class UserRecipes(Resource):
+class Recipes(Resource):
     @jwt_required()
-    @get_user_recipes
-    def get(self, user_id: int, recipes: typing.List[dict]):
-        return make_response(jsonify(recipes), 200)
+    def get(self):
+        pass
 
     @jwt_required()
-    @validate_account_user
+    @get_account_user_id
     @recipe_parser.parse()
-    def put(self, user_id: int, parsed_data: dict):
+    def put(self, account_id: int, parsed_data: dict):
         if parsed_data.get('steps'):
             steps = []
             for step_data in parsed_data.get('steps'):
@@ -245,17 +251,10 @@ class UserRecipes(Resource):
                 ingredients.append(RecipeIngredient(**ingredient_data))
             parsed_data['ingredients'] = ingredients
 
-        recipe = Recipe(user_id=user_id, **parsed_data)
+        recipe = Recipe(user_id=account_id, **parsed_data)
         recipe.add_to_db()
 
         return make_response(jsonify(recipe), 201)
-
-
-class Recipes(Resource):
-    @jwt_required()
-    def get(self):
-        #TODO
-        pass
 
 
 class RecipeData(Resource):

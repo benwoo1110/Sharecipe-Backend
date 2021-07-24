@@ -128,7 +128,7 @@ class TestAPI(unittest.TestCase):
         response = requests.get(f'{URL}/users/{user3.user_id}/recipes', headers=header, json=payload)
         data = response.json()
 
-        # Get recipe data`
+        # Get recipe data
         header = {'Authorization': f'Bearer {user3.access_token}'}
         response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}', headers=header)
         data = response.json()
@@ -172,6 +172,12 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         with open('tests/recipe_images.zip', "wb") as file:
             file.write(response.content)
+
+        # Get recipe data with icons stuff
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}', headers=header)
+        data = response.json()
+        print(data)
 
         # User like recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}

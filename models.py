@@ -1,8 +1,11 @@
 from datetime import datetime
 import typing
+
+from sqlalchemy.sql.elements import Cast
 from app import db
 from passlib.hash import pbkdf2_sha256 as sha256
 from dataclasses import dataclass
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 
 
 class EditableDb:
@@ -85,6 +88,7 @@ class UserFollow(db.Model, EditableDb):
     def get_by_id(cls, user_id: int, follow_id: int):
         return cls.query.filter_by(user_id=user_id, follow_id=follow_id).first()
 
+
 @dataclass
 class Recipe(db.Model, EditableDb):
     __tablename__ = 'recipes'
@@ -97,6 +101,7 @@ class Recipe(db.Model, EditableDb):
     total_time_needed: int
     time_created: datetime
     public: bool
+    icon: 'RecipeImage'
     steps: list
     ingredients: list
     images: list
@@ -113,10 +118,21 @@ class Recipe(db.Model, EditableDb):
     ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
     images = db.relationship('RecipeImage', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
 
+    @hybrid_property
+    def icon(self):
+        try:
+            return RecipeImage.get_icon(self.recipe_id)
+        except NameError:
+            # Class loading order is dumb
+            return None
+
     @classmethod
     def get_for_user_id(cls, user_id: int):
-        q = db.session.query(cls.recipe_id, cls.user_id, cls.name).filter_by(user_id=user_id)
-        return [r._asdict() for r in q.all()]
+        return cls.query.filter_by(user_id=user_id).all() 
+
+        #TODO dont load all data
+        # q = db.session.query(cls.recipe_id, cls.user_id, cls.name).filter_by(user_id=user_id)
+        # return [r._asdict() for r in q.all()]
 
     @classmethod
     def get_by_id(cls, recipe_id: int, user_id: int = None):
@@ -130,8 +146,11 @@ class Recipe(db.Model, EditableDb):
 
     @classmethod
     def get_all_public(cls, name):
-        q = db.session.query(cls.recipe_id, cls.user_id, cls.name).filter(cls.name.contains(name) & cls.public == True)
-        return [r._asdict() for r in q.all()]
+        return cls.query.filter(cls.name.contains(name) & cls.public == True).all()
+
+        #TODO dont load all data
+        # q = db.session.query(cls.recipe_id, cls.user_id, cls.name, cls.icon).filter(cls.name.contains(name) & cls.public == True)
+        # return [r._asdict() for r in q.all()]
 
     @classmethod
     def check_exist(cls, recipe_id: int, user_id: int = None):
@@ -191,6 +210,10 @@ class RecipeImage(db.Model, EditableDb):
 
     file_id = db.Column(db.String(256), primary_key = True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
+
+    @classmethod
+    def get_icon(cls, recipe_id: int):
+        return cls.query.filter_by(recipe_id=recipe_id).first()
 
     @classmethod
     def get_for_recipe_id(cls, recipe_id: set):

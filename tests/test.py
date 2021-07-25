@@ -233,7 +233,7 @@ class TestAPI(unittest.TestCase):
 
         # Upload profile image
         header = {'Authorization': f'Bearer {user2.access_token}'}
-        with open('tests/test.png', 'rb') as image_file:
+        with open('tests/test0.png', 'rb') as image_file:
             test_image = {'image': image_file.read()}
         response = requests.put(f'{URL}/users/{user2.user_id}/profileimage', headers=header, files=test_image)
         self.assertEqual(response.status_code, 200)

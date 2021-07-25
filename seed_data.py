@@ -1,8 +1,8 @@
 import requests
 
 
-use_production = True
-URL = 'https://sharecipe-backend.herokuapp.com' if use_production else 'http://127.0.0.1:5000'
+PRODUCTION_MODE = False
+URL = 'https://sharecipe-backend.herokuapp.com' if PRODUCTION_MODE else 'http://127.0.0.1:5000'
 
 
 class Account:
@@ -28,7 +28,7 @@ header = {'Authorization': f'Bearer {dummy.access_token}'}
 
 
 # Add user profile pic
-with open('tests/profile.jpg', 'rb') as image_file:
+with open('seed_images/profile.jpg', 'rb') as image_file:
     test_image = {'image': image_file.read()}
 response = requests.put(f'{URL}/users/{dummy.user_id}/profileimage', headers=header, files=test_image)
 
@@ -51,9 +51,9 @@ response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, 
 pizza_recipe = response.json()
 
 pizza_images = []
-with open('tests/pizza1.jpg', 'rb') as image_file:
+with open('seed_images/pizza1.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
-with open('tests/pizza2.jpg', 'rb') as image_file:
+with open('seed_images/pizza2.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
 response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{pizza_recipe["recipe_id"]}/images', headers=header, files=pizza_images)
 
@@ -76,9 +76,9 @@ response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, 
 cake_recipe = response.json()
 
 cake_images = []
-with open('tests/cake1.jpg', 'rb') as image_file:
+with open('seed_images/cake1.jpg', 'rb') as image_file:
     cake_images.append(('images', image_file.read()))
-with open('tests/cake2.jpg', 'rb') as image_file:
+with open('seed_images/cake2.jpg', 'rb') as image_file:
     cake_images.append(('images', image_file.read()))
 response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{cake_recipe["recipe_id"]}/images', headers=header, files=cake_images)
 
@@ -101,9 +101,9 @@ response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, 
 nasilemak_recipe = response.json()
 
 pizza_images = []
-with open('tests/nasilemak1.jpg', 'rb') as image_file:
+with open('seed_images/nasilemak1.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
-with open('tests/nasilemak2.jpg', 'rb') as image_file:
+with open('seed_images/nasilemak2.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
 response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{nasilemak_recipe["recipe_id"]}/images', headers=header, files=pizza_images)
 
@@ -126,9 +126,9 @@ response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, 
 sushi_recipe = response.json()
 
 cake_images = []
-with open('tests/sushi1.jpg', 'rb') as image_file:
+with open('seed_images/sushi1.jpg', 'rb') as image_file:
     cake_images.append(('images', image_file.read()))
-with open('tests/sushi2.jpg', 'rb') as image_file:
+with open('seed_images/sushi2.jpg', 'rb') as image_file:
     cake_images.append(('images', image_file.read()))
 response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{sushi_recipe["recipe_id"]}/images', headers=header, files=cake_images)
 
@@ -151,8 +151,8 @@ response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, 
 steak_recipe = response.json()
 
 pizza_images = []
-with open('tests/steak1.jpg', 'rb') as image_file:
+with open('seed_images/steak1.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
-with open('tests/steak2.jpg', 'rb') as image_file:
+with open('seed_images/steak2.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
 response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{steak_recipe["recipe_id"]}/images', headers=header, files=pizza_images)

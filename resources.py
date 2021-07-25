@@ -38,6 +38,7 @@ recipes_parser.add_arg('recipe_ids', required=False)
 
 recipe_parser = JsonParser()
 recipe_parser.add_arg('name')
+recipe_parser.add_arg('description', required=False)
 recipe_parser.add_arg('portion', required=False)
 recipe_parser.add_arg('difficulty', required=False)
 recipe_parser.add_arg('total_time_needed', required=False)

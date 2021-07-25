@@ -96,6 +96,7 @@ class Recipe(db.Model, EditableDb):
     recipe_id: int
     user_id: int
     name: str
+    description: str
     portion: int
     difficulty: int
     total_time_needed: int
@@ -107,8 +108,9 @@ class Recipe(db.Model, EditableDb):
     images: list
 
     recipe_id = db.Column(db.Integer, primary_key = True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable = False)
     name = db.Column(db.String(256), nullable = False)
+    description = db.Column(db.String(2048), nullable = True)
     portion = db.Column(db.Integer, nullable = True)
     difficulty = db.Column(db.Integer, nullable = True)
     total_time_needed = db.Column(db.Integer, nullable = True)

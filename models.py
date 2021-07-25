@@ -10,8 +10,8 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 
 class EditableDb:
 
-    time_created = db.Column(db.DateTime(), nullable = False)
-    time_modified = db.Column(db.DateTime(), nullable = False)
+    time_created = db.Column(db.DateTime(), nullable = True)
+    time_modified = db.Column(db.DateTime(), nullable = True)
 
     def add_to_db(self):
         self.time_created = datetime.now()

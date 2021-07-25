@@ -198,14 +198,12 @@ class RecipeStep(db.Model, EditableDb):
 
     recipe_id: int
     step_number: int
-    name: str
     description: str
     time_created: datetime
     time_modified: datetime
 
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'), primary_key = True)
     step_number = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(256), nullable = False)
     description = db.Column(db.String(1024), nullable = True)
 
     @classmethod

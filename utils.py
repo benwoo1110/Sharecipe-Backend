@@ -32,7 +32,6 @@ class JsonParser:
                     raise ValueError(f'{name} must not be empty!')
                 return value
 
-            print(type(value), ctype)
             if ctype is not None and not isinstance(value, ctype):
                 raise ValueError(f'{name} is of incorrect format!')
             return value

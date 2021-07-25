@@ -23,7 +23,7 @@ class S3FileManager:
 
     def save(self, file_received):
         file_id = str(uuid.uuid1())
-        file_received.save(self.get_local_path(file_id), format="PNG", optimize=True)
+        file_received.save(self.get_local_path(file_id), format="JPEG", optimize=True)
         self._upload(file_id)
         return file_id
 
@@ -57,7 +57,7 @@ class LocalFileManager:
 
     def save(self, file_received):
         file_id = str(uuid.uuid1())
-        file_received.save(self.get_local_path(file_id), format="PNG", optimize=True)
+        file_received.save(self.get_local_path(file_id), format="JPEG", optimize=True)
         return file_id
 
     def upload(self, file_id):

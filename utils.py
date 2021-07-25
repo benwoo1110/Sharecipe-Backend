@@ -18,11 +18,18 @@ class JsonParser:
         self.checks = {}
         self.allow_empty_data = allow_empty_data
 
-    def add_arg(self, name:str, required=True):
+    def add_arg(self, name:str, required=True, ctype=str):
         def check(value):
-            if required and not value:
-                raise ValueError(f'{name} must not be empty!')
+            if not value:
+                if required:
+                    raise ValueError(f'{name} must not be empty!')
+                return value
+
+            print(type(value), ctype)
+            if ctype is not None and not isinstance(value, ctype):
+                raise ValueError(f'{name} is of incorrect format!')
             return value
+
         self.checks[name] = check
 
     def parse_args(self):

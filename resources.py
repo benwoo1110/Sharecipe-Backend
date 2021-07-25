@@ -20,7 +20,7 @@ account_parser.add_arg('bio', required=False)
 
 
 users_parser = JsonParser()
-users_parser.add_arg('user_ids', required=False)
+users_parser.add_arg('user_ids', required=False, ctype=list)
 
 
 user_parser = JsonParser()
@@ -29,32 +29,32 @@ user_parser.add_arg('bio')
 
 
 user_follows_parser = JsonParser()
-user_follows_parser.add_arg('follow_id')
+user_follows_parser.add_arg('follow_id', ctype=int)
 
 
 recipes_parser = JsonParser()
-recipes_parser.add_arg('recipe_ids', required=False)
+recipes_parser.add_arg('recipe_ids', required=False, ctype=list)
 
 
 recipe_parser = JsonParser()
 recipe_parser.add_arg('name')
 recipe_parser.add_arg('description', required=False)
-recipe_parser.add_arg('portion', required=False)
-recipe_parser.add_arg('difficulty', required=False)
-recipe_parser.add_arg('total_time_needed', required=False)
-recipe_parser.add_arg('is_public', required=False)
-recipe_parser.add_arg('steps', required=False)
-recipe_parser.add_arg('ingredients', required=False)
+recipe_parser.add_arg('portion', required=False, ctype=int)
+recipe_parser.add_arg('difficulty', required=False, ctype=int)
+recipe_parser.add_arg('total_time_needed', required=False, ctype=int)
+recipe_parser.add_arg('is_public', required=False, ctype=bool)
+recipe_parser.add_arg('steps', required=False, ctype=list)
+recipe_parser.add_arg('ingredients', required=False, ctype=list)
 
 
 recipe_step_parser = JsonParser()
-recipe_step_parser.add_arg('step_number')
+recipe_step_parser.add_arg('step_number', ctype=int)
 recipe_step_parser.add_arg('name')
 recipe_step_parser.add_arg('description', required=False)
 
 
 recipe_image_parser = JsonParser()
-recipe_image_parser.add_arg('image_ids')
+recipe_image_parser.add_arg('image_ids', ctype=list)
 
 
 class HelloWorld(Resource):

@@ -42,6 +42,7 @@ recipe_parser.add_arg('description', required=False)
 recipe_parser.add_arg('portion', required=False)
 recipe_parser.add_arg('difficulty', required=False)
 recipe_parser.add_arg('total_time_needed', required=False)
+recipe_parser.add_arg('is_public', required=False)
 recipe_parser.add_arg('steps', required=False)
 recipe_parser.add_arg('ingredients', required=False)
 

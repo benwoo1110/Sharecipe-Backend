@@ -54,6 +54,18 @@ class User(db.Model, EditableDb):
     def verify_password(self, password) -> bool:
         return sha256.verify(password, self.password_hash)
 
+    def remove_from_db(self):
+        # Remove recipe
+        for recipe in Recipe.get_for_user_id(self.user_id):
+            recipe.remove_from_db(commit=False)
+
+        # Remove follows
+        for follow in UserFollow.get_for_user_id(self.user_id):
+            db.session.delete(follow)
+
+        db.session.delete(self)
+        db.session.commit()
+
     @classmethod
     def get_by_id(cls, user_id):
         return cls.query.filter_by(user_id = user_id).first()
@@ -136,6 +148,16 @@ class Recipe(db.Model, EditableDb):
         except NameError:
             # Class loading order is dumb
             return None
+
+    def remove_from_db(self, commit=True):
+        # Remove likes
+        for like in RecipeLike.get_for_recipe_id(self.recipe_id):
+            db.session.delete(like)
+
+        db.session.delete(self)
+        
+        if commit:
+            db.session.commit()
 
     @classmethod
     def get_for_user_id(cls, user_id: int):

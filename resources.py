@@ -48,9 +48,8 @@ recipe_parser.add_arg('ingredients', required=False)
 
 recipe_step_parser = JsonParser()
 recipe_step_parser.add_arg('step_number')
-recipe_step_parser.add_arg('name', required=False)
+recipe_step_parser.add_arg('name')
 recipe_step_parser.add_arg('description', required=False)
-recipe_step_parser.add_arg('time_needed', required=False)
 
 
 recipe_image_parser = JsonParser()

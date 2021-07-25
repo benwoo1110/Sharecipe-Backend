@@ -169,13 +169,11 @@ class RecipeStep(db.Model, EditableDb):
     step_number: int
     name: str
     description: str
-    time_needed: int
 
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'), primary_key = True)
     step_number = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(256), nullable = False)
     description = db.Column(db.String(1024), nullable = True)
-    time_needed = db.Column(db.Integer, nullable = True)
 
     @classmethod
     def get_for_recipe_id(cls, recipe_id: int):

@@ -4,7 +4,7 @@ from flask import json, jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
 from models import RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, User, UserFollow, Recipe, RevokedToken
-from utils import JsonParser, obj_to_dict
+from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow
 from file_manager import S3FileManager, LocalFileManager
 from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
 import config
@@ -162,9 +162,9 @@ class UserProfileImage(Resource):
         if not uploaded_file or uploaded_file.filename == '':
             return make_response(jsonify(message='No image uploaded.'), 400)
         
-        #TODO Make sure its a loadable image.
+        profile_image = sanitize_image_with_pillow(uploaded_file)
 
-        file_id = file_manager.save(uploaded_file)
+        file_id = file_manager.save(profile_image)
         user.update(profile_image_id=file_id)
         return make_response(jsonify(message='Profile picture uploaded.'), 200)
 
@@ -346,7 +346,8 @@ class RecipeImages(Resource):
             return make_response(jsonify(message='No image uploaded.'), 400)
 
         for image_file in image_files:
-            file_id = file_manager.save(image_file)
+            image = sanitize_image_with_pillow(image_file)
+            file_id = file_manager.save(image)
             recipe_image = RecipeImage(file_id=file_id, recipe_id=recipe_id)
             recipe_image.add_to_db()
         

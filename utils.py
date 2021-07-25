@@ -4,6 +4,7 @@ from flask.helpers import make_response
 from flask.json import JSONEncoder
 from flask_restful import request, abort, Api
 from jwt.exceptions import ExpiredSignatureError
+from PIL import Image
 
 
 def obj_to_dict(obj, *fields):
@@ -11,6 +12,12 @@ def obj_to_dict(obj, *fields):
     for field in fields:
         data[field] = getattr(obj, field, None)
     return data
+
+
+def sanitize_image_with_pillow(image):
+    img = Image.open(image)
+    img.thumbnail((1080, 1080))
+    return img
 
 
 class JsonParser:

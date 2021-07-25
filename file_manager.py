@@ -23,11 +23,11 @@ class S3FileManager:
 
     def save(self, file_received):
         file_id = str(uuid.uuid1())
-        file_received.save(self.get_local_path(file_id))
-        self.upload(file_id)
+        file_received.save(self.get_local_path(file_id), format="PNG", optimize=True)
+        self._upload(file_id)
         return file_id
 
-    def upload(self, file_id):
+    def _upload(self, file_id):
         self.s3_resource.Bucket(config.AWS_BUCKET_NAME).upload_file(Filename=self.get_local_path(file_id), Key=file_id)
 
     def download(self, file_id):
@@ -57,7 +57,7 @@ class LocalFileManager:
 
     def save(self, file_received):
         file_id = str(uuid.uuid1())
-        file_received.save(self.get_local_path(file_id))
+        file_received.save(self.get_local_path(file_id), format="PNG", optimize=True)
         return file_id
 
     def upload(self, file_id):

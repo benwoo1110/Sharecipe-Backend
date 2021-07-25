@@ -100,7 +100,7 @@ class Recipe(db.Model, EditableDb):
     difficulty: int
     total_time_needed: int
     time_created: datetime
-    public: bool
+    is_public: bool
     icon: 'RecipeImage'
     steps: list
     ingredients: list
@@ -112,7 +112,7 @@ class Recipe(db.Model, EditableDb):
     portion = db.Column(db.Integer, nullable = True)
     difficulty = db.Column(db.Integer, nullable = True)
     total_time_needed = db.Column(db.Integer, nullable = True)
-    public = db.Column(db.Boolean, unique=False, default=True)
+    is_public = db.Column(db.Boolean, unique=False, default=True)
     time_created = db.Column(db.DateTime(), nullable = False)
     steps = db.relationship('RecipeStep', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
     ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
@@ -146,7 +146,7 @@ class Recipe(db.Model, EditableDb):
 
     @classmethod
     def get_all_public(cls, name):
-        return cls.query.filter(cls.name.contains(name) & cls.public == True).all()
+        return cls.query.filter(cls.name.contains(name) & cls.is_public == True).all()
 
         #TODO dont load all data
         # q = db.session.query(cls.recipe_id, cls.user_id, cls.name, cls.icon).filter(cls.name.contains(name) & cls.public == True)

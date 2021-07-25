@@ -38,8 +38,8 @@ payload = {
     'name': 'Round Pizza',
     'difficulty': 5,
     'steps': [
-        {'step_number': 1, 'name': 'a', 'description': 'Add water.'}, 
-        {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}
+        {'step_number': 1, 'description': 'Add water.'}, 
+        {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
         {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
@@ -63,8 +63,8 @@ payload = {
     'name': 'Chocolate Cake',
     'difficulty': 5,
     'steps': [
-        {'step_number': 1, 'name': 'a', 'description': 'Add water.'}, 
-        {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}
+        {'step_number': 1, 'description': 'Add water.'}, 
+        {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
         {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
@@ -88,8 +88,8 @@ payload = {
     'name': 'Nasi Lemak',
     'difficulty': 5,
     'steps': [
-        {'step_number': 1, 'name': 'a', 'description': 'Add water.'}, 
-        {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}
+        {'step_number': 1, 'description': 'Add water.'}, 
+        {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
         {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
@@ -113,8 +113,8 @@ payload = {
     'name': 'Assorted Sushi',
     'difficulty': 5,
     'steps': [
-        {'step_number': 1, 'name': 'a', 'description': 'Add water.'}, 
-        {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}
+        {'step_number': 1, 'description': 'Add water.'}, 
+        {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
         {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
@@ -138,8 +138,8 @@ payload = {
     'name': 'US Ribeye Steak',
     'difficulty': 5,
     'steps': [
-        {'step_number': 1, 'name': 'a', 'description': 'Add water.'}, 
-        {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}
+        {'step_number': 1, 'description': 'Add water.'}, 
+        {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
         {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},

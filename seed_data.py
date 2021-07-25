@@ -47,7 +47,7 @@ payload = {
     ]
 }
 
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, json=payload)
+response = requests.put(f'{URL}/recipes', headers=header, json=payload)
 pizza_recipe = response.json()
 
 pizza_images = []
@@ -55,7 +55,7 @@ with open('seed_images/pizza1.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
 with open('seed_images/pizza2.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{pizza_recipe["recipe_id"]}/images', headers=header, files=pizza_images)
+response = requests.put(f'{URL}/recipes/{pizza_recipe["recipe_id"]}/images', headers=header, files=pizza_images)
 
 
 # Add cake recipe
@@ -72,7 +72,7 @@ payload = {
     ]
 }
 
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, json=payload)
+response = requests.put(f'{URL}/recipes', headers=header, json=payload)
 cake_recipe = response.json()
 
 cake_images = []
@@ -80,7 +80,7 @@ with open('seed_images/cake1.jpg', 'rb') as image_file:
     cake_images.append(('images', image_file.read()))
 with open('seed_images/cake2.jpg', 'rb') as image_file:
     cake_images.append(('images', image_file.read()))
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{cake_recipe["recipe_id"]}/images', headers=header, files=cake_images)
+response = requests.put(f'{URL}/recipes/{cake_recipe["recipe_id"]}/images', headers=header, files=cake_images)
 
 
 # Add nasi lemak recipe
@@ -97,7 +97,7 @@ payload = {
     ]
 }
 
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, json=payload)
+response = requests.put(f'{URL}/recipes', headers=header, json=payload)
 nasilemak_recipe = response.json()
 
 pizza_images = []
@@ -105,7 +105,7 @@ with open('seed_images/nasilemak1.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
 with open('seed_images/nasilemak2.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{nasilemak_recipe["recipe_id"]}/images', headers=header, files=pizza_images)
+response = requests.put(f'{URL}/recipes/{nasilemak_recipe["recipe_id"]}/images', headers=header, files=pizza_images)
 
 
 # Add cake recipe
@@ -122,7 +122,7 @@ payload = {
     ]
 }
 
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, json=payload)
+response = requests.put(f'{URL}/recipes', headers=header, json=payload)
 sushi_recipe = response.json()
 
 cake_images = []
@@ -130,7 +130,7 @@ with open('seed_images/sushi1.jpg', 'rb') as image_file:
     cake_images.append(('images', image_file.read()))
 with open('seed_images/sushi2.jpg', 'rb') as image_file:
     cake_images.append(('images', image_file.read()))
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{sushi_recipe["recipe_id"]}/images', headers=header, files=cake_images)
+response = requests.put(f'{URL}/recipes/{sushi_recipe["recipe_id"]}/images', headers=header, files=cake_images)
 
 
 # Add pizza recipe
@@ -147,7 +147,7 @@ payload = {
     ]
 }
 
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes', headers=header, json=payload)
+response = requests.put(f'{URL}/recipes', headers=header, json=payload)
 steak_recipe = response.json()
 
 pizza_images = []
@@ -155,4 +155,4 @@ with open('seed_images/steak1.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
 with open('seed_images/steak2.jpg', 'rb') as image_file:
     pizza_images.append(('images', image_file.read()))
-response = requests.put(f'{URL}/users/{dummy.user_id}/recipes/{steak_recipe["recipe_id"]}/images', headers=header, files=pizza_images)
+response = requests.put(f'{URL}/recipes/{steak_recipe["recipe_id"]}/images', headers=header, files=pizza_images)

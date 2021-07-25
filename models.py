@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 import typing
 
 from sqlalchemy.sql.elements import Cast
@@ -9,16 +9,25 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 
 
 class EditableDb:
+
+    time_created = db.Column(db.DateTime(), nullable = False)
+    time_modified = db.Column(db.DateTime(), nullable = False)
+
     def add_to_db(self):
         self.time_created = datetime.now()
+        self.time_modified = datetime.now()
         db.session.add(self)
         db.session.commit()
 
     def update(self, **kwargs):
+        did_change = False
         for attr, data in kwargs.items():
             if hasattr(self, attr):
                 setattr(self, attr, data)
-        db.session.commit()
+                did_change = True
+        if did_change:
+            self.time_modified = datetime.now()
+            db.session.commit()
 
     def remove_from_db(self):
         db.session.delete(self)
@@ -32,15 +41,15 @@ class User(db.Model, EditableDb):
     user_id: int
     username: str
     bio: str
-    time_created: datetime
     profile_image_id: str
+    time_created: datetime
+    time_modified: datetime
 
     user_id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(128), unique = True, nullable = False)
     password_hash = db.Column(db.String(128), nullable = False)
     bio = db.Column(db.String(512), nullable = True)
     profile_image_id = db.Column(db.String(256), nullable = True)
-    time_created = db.Column(db.DateTime(), nullable = False)
 
     def verify_password(self, password) -> bool:
         return sha256.verify(password, self.password_hash)
@@ -100,12 +109,13 @@ class Recipe(db.Model, EditableDb):
     portion: int
     difficulty: int
     total_time_needed: int
-    time_created: datetime
     is_public: bool
     icon: 'RecipeImage'
     steps: list
     ingredients: list
     images: list
+    time_created: datetime
+    time_modified: datetime
 
     recipe_id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable = False)
@@ -115,7 +125,6 @@ class Recipe(db.Model, EditableDb):
     difficulty = db.Column(db.Integer, nullable = True)
     total_time_needed = db.Column(db.Integer, nullable = True)
     is_public = db.Column(db.Boolean, unique=False, default=True)
-    time_created = db.Column(db.DateTime(), nullable = False)
     steps = db.relationship('RecipeStep', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
     ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
     images = db.relationship('RecipeImage', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
@@ -169,6 +178,8 @@ class RecipeStep(db.Model, EditableDb):
     step_number: int
     name: str
     description: str
+    time_created: datetime
+    time_modified: datetime
 
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'), primary_key = True)
     step_number = db.Column(db.Integer, primary_key = True)
@@ -193,6 +204,8 @@ class RecipeIngredient(db.Model, EditableDb):
     name: str
     quantity: int
     unit: str
+    time_created: datetime
+    time_modified: datetime
 
     ingredient_id = db.Column(db.Integer, primary_key = True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
@@ -207,6 +220,8 @@ class RecipeImage(db.Model, EditableDb):
 
     file_id: str
     recipe_id: int
+    time_created: datetime
+    time_modified: datetime
 
     file_id = db.Column(db.String(256), primary_key = True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
@@ -240,6 +255,8 @@ class RecipeLike(db.Model, EditableDb):
 
     recipe_id: int
     user_id: int
+    time_created: datetime
+    time_modified: datetime
 
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key = True)
@@ -259,10 +276,13 @@ class RecipeLike(db.Model, EditableDb):
 
 class RevokedToken(db.Model):
     __tablename__ = 'revoked_tokens'
+
     id = db.Column(db.Integer, primary_key = True)
     jti = db.Column(db.String(120), nullable = False)
+    revoke_time = db.Column(db.DateTime(), nullable = False)
 
     def add(self):
+        self.revoke_time = datetime.now()
         db.session.add(self)
         db.session.commit()
     

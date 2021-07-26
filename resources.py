@@ -330,7 +330,7 @@ class RecipeImages(Resource):
     @check_recipe_exists
     @get_recipe_images
     def get(self, recipe_id: int, recipe_images: list):
-        zipfolder = zipfile.ZipFile('downloads/images.zip', 'w', compression = zipfile.ZIP_STORED)
+        zipfolder = zipfile.ZipFile('downloads/images.zip', 'w', compression = zipfile.ZIP_DEFLATED)
         for recipe_image in recipe_images:
             zipfolder.write(file_manager.download(recipe_image.file_id), recipe_image.file_id)
         zipfolder.close()

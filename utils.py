@@ -45,22 +45,34 @@ class JsonParser:
 
         self.checks[name] = check
 
-    def parse_args(self):
-        data = request.get_json() or {}
-        parsed_data = {}
+    def add_nested_parser(self, name:str, parser: 'JsonParser', required=True):
+        def check(value):
+            if not value:
+                if required:
+                    raise ValueError(f'{name} must not be empty!')
+                return value
+            
+            if isinstance(value, list):
+                parsed_data = []
+                for item in value:
+                    parsed_data.append(parser.parse_args(item))
+                return parsed_data
+            else:
+                return parser.parse_args(value)
+
+        self.checks[name] = check
+
+    def parse_args(self, data):
         if not data:
             if not self.allow_empty_data:
-                abort(400, message='No data received!')
+                raise ValueError(f'No data received!')
+
+        parsed_data = {}
 
         for arg, check in self.checks.items():
-            value = data.get(arg, None)
-            try:
-                value = check(value)
-            except Exception as e:
-                abort(400, message=str(e))
-            else:
-                if value:
-                    parsed_data[arg] = value
+            value = check(data.get(arg, None))
+            if value:
+                parsed_data[arg] = value
 
         return parsed_data
 
@@ -68,20 +80,10 @@ class JsonParser:
         def decorator(func):
             def wrapper(*args, **kwargs):
                 data = request.get_json() or {}
-                if not data and not self.allow_empty_data:
-                    return make_response(jsonify(message='No data received!'), 400)
-                
-                parsed_data = {}
-
-                for arg, check in self.checks.items():
-                    value = data.get(arg, None)
-                    try:
-                        value = check(value)
-                    except Exception as e:
-                        return make_response(jsonify(message=str(e)), 400)
-                    else:
-                        if value:
-                            parsed_data[arg] = value
+                try:
+                    parsed_data = self.parse_args(data)
+                except Exception as e:
+                    return make_response(jsonify(message=str(e)), 400)
 
                 return func(*args, parsed_data=parsed_data, **kwargs)
 

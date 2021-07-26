@@ -1,3 +1,4 @@
+import re
 import typing
 import zipfile
 from flask import json, jsonify, make_response, send_file
@@ -36,15 +37,10 @@ recipes_parser = JsonParser()
 recipes_parser.add_arg('recipe_ids', required=False, ctype=list)
 
 
-recipe_parser = JsonParser()
-recipe_parser.add_arg('name')
-recipe_parser.add_arg('description', required=False)
-recipe_parser.add_arg('portion', required=False, ctype=int)
-recipe_parser.add_arg('difficulty', required=False, ctype=int)
-recipe_parser.add_arg('total_time_needed', required=False, ctype=int)
-recipe_parser.add_arg('is_public', required=False, ctype=bool)
-recipe_parser.add_arg('steps', required=False, ctype=list)
-recipe_parser.add_arg('ingredients', required=False, ctype=list)
+recipe_ingredients_parser = JsonParser()
+recipe_ingredients_parser.add_arg('name')
+recipe_ingredients_parser.add_arg('quantity', ctype=int)
+recipe_ingredients_parser.add_arg('unit', required=False)
 
 
 recipe_step_parser = JsonParser()
@@ -54,6 +50,17 @@ recipe_step_parser.add_arg('description')
 
 recipe_image_parser = JsonParser()
 recipe_image_parser.add_arg('image_ids', ctype=list)
+
+
+recipe_parser = JsonParser()
+recipe_parser.add_arg('name')
+recipe_parser.add_arg('description', required=False)
+recipe_parser.add_arg('portion', required=False, ctype=int)
+recipe_parser.add_arg('difficulty', required=False, ctype=int)
+recipe_parser.add_arg('total_time_needed', required=False, ctype=int)
+recipe_parser.add_arg('is_public', required=False, ctype=bool)
+recipe_parser.add_nested_parser('steps', recipe_step_parser, required=False)
+recipe_parser.add_nested_parser('ingredients', recipe_ingredients_parser, required=False)
 
 
 class HelloWorld(Resource):

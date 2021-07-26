@@ -113,8 +113,8 @@ class TestAPI(unittest.TestCase):
             'difficulty': 5,
             'is_public': True,
             'steps': [
-                {'step_number': 1, 'name': 'a', 'description': 'Add water.'}, 
-                {'step_number': 2, 'name': 'b', 'description': 'Add egg.'}
+                {'step_number': 1, 'description': 'Add water.'}, 
+                {'step_number': 2, 'description': 'Add egg.'}
             ],
             'ingredients': [
                 {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
@@ -153,7 +153,7 @@ class TestAPI(unittest.TestCase):
 
         # Add a recipe step
         header = {'Authorization': f'Bearer {user3.access_token}'}
-        payload = {'step_number': 3, 'name': 'c', 'description': 'Boil over stove.'}
+        payload = {'step_number': 3, 'description': 'Boil over stove.'}
         response = requests.put(f'{URL}/recipes/{recipe_data["recipe_id"]}/steps', headers=header, json=payload)
         data = response.json()
         self.matchDict(data, recipe_id=recipe_data["recipe_id"], **payload)

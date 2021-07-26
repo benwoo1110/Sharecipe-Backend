@@ -332,7 +332,7 @@ class RecipeImages(Resource):
     def get(self, recipe_id: int, recipe_images: list):
         zipfolder = zipfile.ZipFile('downloads/images.zip', 'w', compression = zipfile.ZIP_STORED)
         for recipe_image in recipe_images:
-            zipfolder.write(file_manager.get_local_path(recipe_image.file_id), recipe_image.file_id)
+            zipfolder.write(file_manager.download(recipe_image.file_id), recipe_image.file_id)
         zipfolder.close()
 
         return send_file('downloads/images.zip',  as_attachment = True)

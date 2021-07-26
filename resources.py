@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required, create_access_token, create_refresh
 from models import RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, User, UserFollow, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow
 from file_manager import S3FileManager, LocalFileManager
-from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
+from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
 import config
 
 
@@ -224,6 +224,14 @@ class UserFollows(Resource):
             return make_response(jsonify(message='Not following that user.'), 404)
         user_follow.remove_from_db()
         return make_response('', 204)
+
+
+class UserFollowers(Resource):
+    @jwt_required()
+    @check_user_exists
+    @get_user_followers
+    def get(self, user_id: int, user_followers: typing.List[UserFollow]):
+        return make_response(jsonify(user_followers), 200)
 
 
 class UserRecipes(Resource):
@@ -445,4 +453,3 @@ class Search(Resource):
         result_data["recipes"] = Recipe.get_all_public(search_string)
         result_data["users"] = User.get_all_public(search_string)
         return make_response(jsonify(result_data), 200)
- 

@@ -72,6 +72,13 @@ def get_user_follows(func):
     return wrapper
 
 
+def get_user_followers(func):
+    def wrapper(*args, **kwargs):
+        user_followers: UserFollow = UserFollow.get_for_follow_id(kwargs['user_id'])
+        return func(*args, user_followers=user_followers, **kwargs)
+    return wrapper
+
+
 def get_user_recipes(func):
     def wrapper(*args, **kwargs):
         recipes: typing.List[dict] = Recipe.get_for_user_id(kwargs['user_id'])

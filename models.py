@@ -106,6 +106,10 @@ class UserFollow(db.Model, EditableDb):
         return cls.query.filter_by(user_id=user_id).all()
 
     @classmethod
+    def get_for_follow_id(cls, follow_id: int):
+        return cls.query.filter_by(follow_id=follow_id).all()
+
+    @classmethod
     def get_by_id(cls, user_id: int, follow_id: int):
         return cls.query.filter_by(user_id=user_id, follow_id=follow_id).first()
 

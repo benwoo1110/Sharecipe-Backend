@@ -103,6 +103,18 @@ class TestAPI(unittest.TestCase):
         response = requests.get(f'{URL}/users/{user1.user_id}/follows', headers=header)
         follows_data = response.json()
         self.assertEqual(len(follows_data), 2)
+        
+        # Get user 1 followers
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/users/{user1.user_id}/followers', headers=header)
+        follows_data = response.json()
+        self.assertEqual(len(follows_data), 0)
+
+        # Get user 2 followers
+        header = {'Authorization': f'Bearer {user2.access_token}'}
+        response = requests.get(f'{URL}/users/{user2.user_id}/followers', headers=header)
+        follows_data = response.json()
+        self.assertEqual(len(follows_data), 1)
 
         # Create new recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}

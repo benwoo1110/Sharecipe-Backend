@@ -275,13 +275,17 @@ class RecipeData(Resource):
     @get_recipe
     @recipe_parser.parse()
     def patch(self, recipe_id: int, recipe: Recipe, parsed_data: dict):
-        if parsed_data.get('steps'):
+        if 'steps' in parsed_data:
             steps = []
             for step_data in parsed_data.get('steps'):
                 steps.append(RecipeStep(**step_data))
             parsed_data['steps'] = steps
 
-        #TODO patch ingredients
+        if 'ingredients' in parsed_data:
+            steps = []
+            for step_data in parsed_data.get('ingredients'):
+                steps.append(RecipeIngredient(**step_data))
+            parsed_data['ingredients'] = steps
 
         recipe.update(**parsed_data)
         return make_response(jsonify(recipe), 200)

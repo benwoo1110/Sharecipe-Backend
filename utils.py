@@ -66,6 +66,7 @@ class JsonParser:
         if not data:
             if not self.allow_empty_data:
                 raise ValueError(f'No data received!')
+            return data
 
         parsed_data = {}
 

@@ -178,7 +178,7 @@ class TestAPI(unittest.TestCase):
 
         # Get recipe images
         header = {'Authorization': f'Bearer {user3.access_token}'}
-        response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}/images', headers=header)
+        response = requests.post(f'{URL}/recipes/{recipe_data["recipe_id"]}/images', headers=header)
         self.assertEqual(response.status_code, 200)
         with open('tests/recipe_images.zip', "wb") as file:
             file.write(response.content)

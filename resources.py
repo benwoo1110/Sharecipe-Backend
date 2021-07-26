@@ -33,8 +33,12 @@ user_follows_parser = JsonParser()
 user_follows_parser.add_arg('follow_id', ctype=int)
 
 
-recipes_parser = JsonParser()
+recipes_parser = JsonParser(allow_empty_data=True)
 recipes_parser.add_arg('recipe_ids', required=False, ctype=list)
+
+
+recipe_images_parser = JsonParser(allow_empty_data=True)
+recipe_images_parser.add_arg('recipe_images_ids', required=False, ctype=list)
 
 
 recipe_ingredients_parser = JsonParser()
@@ -339,11 +343,16 @@ class RecipeStepData(Resource):
 class RecipeImages(Resource):
     @jwt_required()
     @check_recipe_exists
-    @get_recipe_images
-    def get(self, recipe_id: int, recipe_images: list):
+    @recipe_images_parser.parse()
+    def post(self, recipe_id: int, parsed_data: dict):
+        target = parsed_data.get('recipe_images_ids', None)
+        target = set(target) if target else None
+        recipe_images: list = RecipeImage.get_for_recipe_id(recipe_id)
+
         zipfolder = zipfile.ZipFile('downloads/images.zip', 'w', compression = zipfile.ZIP_DEFLATED)
         for recipe_image in recipe_images:
-            zipfolder.write(file_manager.download(recipe_image.file_id), recipe_image.file_id)
+            if not target or recipe_image.file_id in target:
+                zipfolder.write(file_manager.download(recipe_image.file_id), recipe_image.file_id)
         zipfolder.close()
 
         return send_file('downloads/images.zip',  as_attachment = True)

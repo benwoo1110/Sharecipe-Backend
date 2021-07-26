@@ -17,6 +17,13 @@ def obj_to_dict(obj, *fields):
 def sanitize_image_with_pillow(image):
     img = Image.open(image)
     img.thumbnail((1080, 1080))
+
+    if img.mode in ("RGBA", "P"):
+        alpha = img.convert('RGBA').split()[-1]
+        background = Image.new("RGB", img.size, (248, 170, 157))
+        background.paste(img, mask=alpha)
+        img = background
+
     return img
 
 

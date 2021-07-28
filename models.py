@@ -67,6 +67,8 @@ class User(db.Model, EditableDb):
         for follow in UserFollow.get_for_follow_id(self.user_id):
             db.session.delete(follow)
 
+        db.session.commit()
+
         db.session.delete(self)
         db.session.commit()
 

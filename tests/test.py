@@ -199,7 +199,6 @@ class TestAPI(unittest.TestCase):
         header = {'Authorization': f'Bearer {user3.access_token}'}
         response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}', headers=header)
         data = response.json()
-        print(data)
 
         # User like recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}
@@ -229,12 +228,18 @@ class TestAPI(unittest.TestCase):
         response = requests.delete(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes', headers=header)
         self.assertEqual(response.status_code, 204)
 
-        # User doesnt have likes
+        # User doesn't have likes
         header = {'Authorization': f'Bearer {user1.access_token}'}
         response = requests.get(f'{URL}/users/{user1.user_id}/recipes/likes', headers=header)
         like_data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(like_data), 0)
+
+        # Get the amazing discover page
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/discover', headers=header)
+        discover_data = response.json()
+        print(discover_data)
 
         # Delete recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}

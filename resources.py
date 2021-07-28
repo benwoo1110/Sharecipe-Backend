@@ -4,7 +4,7 @@ import zipfile
 from flask import json, jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
-from models import RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, User, UserFollow, Recipe, RevokedToken
+from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, User, UserFollow, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow
 from file_manager import S3FileManager, LocalFileManager
 from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
@@ -127,6 +127,10 @@ class AccountDelete(Resource):
     @jwt_required(refresh=True)
     @get_account_user
     def delete(self, user: User):
+        jti = get_jwt()['jti']
+        revoked_token = RevokedToken(jti = jti)
+        revoked_token.add()
+
         user.remove_from_db()
         return make_response('', 204)
 
@@ -453,3 +457,17 @@ class Search(Resource):
         result_data["recipes"] = Recipe.get_all_public(search_string)
         result_data["users"] = User.get_all_public(search_string)
         return make_response(jsonify(result_data), 200)
+
+
+class Discover(Resource):
+    @jwt_required()
+    @get_account_user_id
+    def get(self, account_id):
+        recipes = Recipe.get_all_public('')
+        discovers = []
+        discovers.append(DiscoverSection(header="Latest", size="large", recipes=recipes))
+        discovers.append(DiscoverSection(header="Chicken", size="normal", recipes=recipes))
+        discovers.append(DiscoverSection(header="Drinks", size="normal", recipes=recipes))
+        discovers.append(DiscoverSection(header="Supper", size="normal", recipes=recipes))
+        discovers.append(DiscoverSection(header="Munch", size="normal", recipes=recipes))
+        return make_response(jsonify(sections=discovers), 200)

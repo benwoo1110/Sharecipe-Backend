@@ -37,6 +37,7 @@ response = requests.put(f'{URL}/users/{dummy.user_id}/profileimage', headers=hea
 payload = {
     'name': 'Round Pizza',
     'difficulty': 5,
+    'is_public': True,
     'steps': [
         {'step_number': 1, 'description': 'Add water.'}, 
         {'step_number': 2, 'description': 'Add egg.'}
@@ -62,6 +63,7 @@ response = requests.put(f'{URL}/recipes/{pizza_recipe["recipe_id"]}/images', hea
 payload = {
     'name': 'Chocolate Cake',
     'difficulty': 5,
+    'is_public': True,
     'steps': [
         {'step_number': 1, 'description': 'Add water.'}, 
         {'step_number': 2, 'description': 'Add egg.'}
@@ -87,6 +89,7 @@ response = requests.put(f'{URL}/recipes/{cake_recipe["recipe_id"]}/images', head
 payload = {
     'name': 'Nasi Lemak',
     'difficulty': 5,
+    'is_public': True,
     'steps': [
         {'step_number': 1, 'description': 'Add water.'}, 
         {'step_number': 2, 'description': 'Add egg.'}
@@ -112,6 +115,7 @@ response = requests.put(f'{URL}/recipes/{nasilemak_recipe["recipe_id"]}/images',
 payload = {
     'name': 'Assorted Sushi',
     'difficulty': 5,
+    'is_public': True,
     'steps': [
         {'step_number': 1, 'description': 'Add water.'}, 
         {'step_number': 2, 'description': 'Add egg.'}
@@ -137,6 +141,7 @@ response = requests.put(f'{URL}/recipes/{sushi_recipe["recipe_id"]}/images', hea
 payload = {
     'name': 'US Ribeye Steak',
     'difficulty': 5,
+    'is_public': True,
     'steps': [
         {'step_number': 1, 'description': 'Add water.'}, 
         {'step_number': 2, 'description': 'Add egg.'}

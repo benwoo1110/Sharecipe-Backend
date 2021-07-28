@@ -320,3 +320,11 @@ class RevokedToken(db.Model):
     def is_jti_blacklisted(cls, jti):
         query = cls.query.filter_by(jti = jti).first()
         return bool(query)
+
+
+@dataclass
+class DiscoverSection:
+
+    header: str
+    size: str
+    recipes: list

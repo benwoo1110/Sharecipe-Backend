@@ -55,6 +55,7 @@ api.add_resource(resources.RecipeIcon,          '/recipes/<int:recipe_id>/icon')
 api.add_resource(resources.RecipeLikes,         '/recipes/<int:recipe_id>/likes') # GET PUT DELETE
 
 api.add_resource(resources.Search,              '/search') # GET
+api.add_resource(resources.Discover,            '/discover') # GET
 
 
 if __name__ == "__main__":

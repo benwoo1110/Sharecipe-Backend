@@ -1,8 +1,8 @@
 import requests
 
 
-PRODUCTION_MODE = False
-URL = 'https://sharecipe-backend.herokuapp.com' if PRODUCTION_MODE else 'http://127.0.0.1:5000'
+PRODUCTION_MODE = True
+URL = 'https://sharecipe-production.herokuapp.com' if PRODUCTION_MODE else 'https://sharecipe-backend.herokuapp.com'
 
 
 class Account:
@@ -23,7 +23,7 @@ class Account:
 
 
 # Create user
-dummy = Account.add('Benergy10', '1234', 'Code. Create. Coordinate.')
+dummy = Account.add('Benergy10', 'Je93ndx#', 'Code. Create. Coordinate.')
 header = {'Authorization': f'Bearer {dummy.access_token}'}
 
 

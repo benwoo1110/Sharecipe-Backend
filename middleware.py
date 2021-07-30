@@ -67,15 +67,22 @@ def check_user_exists(func):
 
 def get_user_follows(func):
     def wrapper(*args, **kwargs):
-        user_follows: UserFollow = UserFollow.get_for_user_id(kwargs['user_id'])
+        user_follows: typing.List[UserFollow] = UserFollow.get_for_user_id(kwargs['user_id'])
         return func(*args, user_follows=user_follows, **kwargs)
     return wrapper
 
 
 def get_user_followers(func):
     def wrapper(*args, **kwargs):
-        user_followers: UserFollow = UserFollow.get_for_follow_id(kwargs['user_id'])
+        user_followers: typing.List[UserFollow] = UserFollow.get_for_follow_id(kwargs['user_id'])
         return func(*args, user_followers=user_followers, **kwargs)
+    return wrapper
+
+
+def get_user_follow(func):
+    def wrapper(*args, **kwargs):
+        user_follow: UserFollow = UserFollow.get_by_id(kwargs['user_id'], kwargs['follow_id'])
+        return func(*args, user_follow=user_follow, **kwargs)
     return wrapper
 
 

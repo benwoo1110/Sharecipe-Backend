@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required, create_access_token, create_refresh
 from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, User, UserFollow, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow
 from file_manager import S3FileManager, LocalFileManager
-from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
+from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_follow, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
 import config
 
 
@@ -211,24 +211,6 @@ class UserFollows(Resource):
     def get(self, user_id: int, user_follows: typing.List[UserFollow]):
         return make_response(jsonify(user_follows), 200)
 
-    @jwt_required()
-    @validate_account_user
-    @user_follows_parser.parse()
-    def put(self, user_id: int, parsed_data: dict):
-        user_follow = UserFollow(user_id=user_id, **parsed_data)
-        user_follow.add_to_db()
-        return make_response(jsonify(user_follow), 201)
-
-    @jwt_required()
-    @validate_account_user
-    @user_follows_parser.parse()
-    def delete(self, user_id: int, parsed_data: dict):
-        user_follow: UserFollow = UserFollow.get_by_id(user_id, parsed_data['follow_id'])
-        if not user_follow:
-            return make_response(jsonify(message='Not following that user.'), 404)
-        user_follow.remove_from_db()
-        return make_response('', 204)
-
 
 class UserFollowers(Resource):
     @jwt_required()
@@ -236,6 +218,36 @@ class UserFollowers(Resource):
     @get_user_followers
     def get(self, user_id: int, user_followers: typing.List[UserFollow]):
         return make_response(jsonify(user_followers), 200)
+
+
+class UserFollowUser(Resource):
+    @jwt_required()
+    @check_user_exists
+    @get_user_follow
+    def get(self, user_id: int, follow_id, user_follow: UserFollow):
+        state: bool = user_follow is not None
+        return make_response(jsonify(state=state), 200)
+
+    @jwt_required()
+    @validate_account_user
+    @get_user_follow
+    def post(self, user_id: int, follow_id, user_follow: UserFollow):
+        if user_follow is not None:
+            return make_response(jsonify(message='Account already follow that user.'), 400)
+
+        follow = UserFollow(user_id=user_id, follow_id=follow_id)
+        follow.add_to_db()
+        return make_response(jsonify(follow), 201)
+
+    @jwt_required()
+    @validate_account_user
+    @get_user_follow
+    def delete(self, user_id: int, follow_id, user_follow: UserFollow):
+        if user_follow is None:
+            return make_response(jsonify(message='Account is not follow that user.'), 400)
+
+        user_follow.remove_from_db()
+        return make_response('', 204)
 
 
 class UserRecipes(Resource):

@@ -20,6 +20,11 @@ account_parser.add_arg('password')
 account_parser.add_arg('bio', required=False)
 
 
+account_password_parser = JsonParser()
+account_password_parser.add_arg('old_password')
+account_password_parser.add_arg('new_password')
+
+
 users_parser = JsonParser()
 users_parser.add_arg('user_ids', required=False, ctype=list)
 
@@ -109,6 +114,19 @@ class AccountRefresh(Resource):
     def post(self, user: User):
         access_token = create_access_token(identity=user.user_id)
         return make_response(jsonify(user_id=user.user_id, access_token=access_token), 200)
+
+
+class AccountPassword(Resource):
+    @jwt_required(refresh=True)
+    @get_account_user
+    @account_password_parser.parse()
+    def post(self, user: User, parsed_data: dict):
+        if not user.verify_password(parsed_data.get('old_password')):
+            return make_response(jsonify(message='Incorrect username or password.'), 400)
+
+        password_hash = User.hash_password(parsed_data.get('new_password'))
+        user.update(password_hash=password_hash)
+        return make_response('', 204)
 
 
 class AccountLogout(Resource):

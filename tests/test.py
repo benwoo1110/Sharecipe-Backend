@@ -88,6 +88,17 @@ class TestAPI(unittest.TestCase):
         data = response.json()
         self.matchDict(data, user_id=user1.user_id, username="totallyNotAdmin", bio="Code. Create. Coordinate.")
 
+        # Change password
+        header = {'Authorization': f'Bearer {user2.refresh_token}'}
+        payload = {'old_password': '123456', 'new_password': '654321'}
+        response = requests.post(f'{URL}/account/changepassword', headers=header, json=payload)
+        self.assertEqual(response.status_code, 204)
+
+        # Try login
+        payload = {'username': 'testing456', 'password': '654321'}
+        response = requests.post(f'{URL}/account/login', json=payload)
+        self.assertEqual(response.status_code, 200)
+
         # Follow another user
         header = {'Authorization': f'Bearer {user1.access_token}'}
         response = requests.post(f'{URL}/users/{user1.user_id}/follows/{user2.user_id}', headers=header)

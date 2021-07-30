@@ -33,6 +33,7 @@ api.add_resource(resources.HelloWorld,          '/hello') # GET
 api.add_resource(resources.AccountRegister,     '/account/register') # POST
 api.add_resource(resources.AccountLogin,        '/account/login') # POST
 api.add_resource(resources.AccountRefresh,      '/account/refresh') # POST
+api.add_resource(resources.AccountPassword,     '/account/changepassword') # POST
 api.add_resource(resources.AccountLogout,       '/account/logout') # POST
 api.add_resource(resources.AccountDelete,       '/account/delete') # POST
 

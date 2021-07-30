@@ -90,13 +90,11 @@ class TestAPI(unittest.TestCase):
 
         # Follow another user
         header = {'Authorization': f'Bearer {user1.access_token}'}
-        payload = {'follow_id': user2.user_id}
-        response = requests.put(f'{URL}/users/{user1.user_id}/follows', headers=header,  json=payload)
+        response = requests.post(f'{URL}/users/{user1.user_id}/follows/{user2.user_id}', headers=header)
 
         # Follow a second user
         header = {'Authorization': f'Bearer {user1.access_token}'}
-        payload = {'follow_id': user3.user_id}
-        response = requests.put(f'{URL}/users/{user1.user_id}/follows', headers=header,  json=payload)
+        response = requests.post(f'{URL}/users/{user1.user_id}/follows/{user3.user_id}', headers=header)
 
         # Get user follows
         header = {'Authorization': f'Bearer {user1.access_token}'}
@@ -115,6 +113,10 @@ class TestAPI(unittest.TestCase):
         response = requests.get(f'{URL}/users/{user2.user_id}/followers', headers=header)
         follows_data = response.json()
         self.assertEqual(len(follows_data), 1)
+
+        # Get follow state
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/users/{user1.user_id}/follows/{user3.user_id}', headers=header)
 
         # Create new recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}
@@ -202,12 +204,12 @@ class TestAPI(unittest.TestCase):
 
         # User like recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}
-        response = requests.put(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes', headers=header)
+        response = requests.post(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes/{user1.user_id}', headers=header)
         self.assertEqual(response.status_code, 201)
 
         # Another user like recipe
         header = {'Authorization': f'Bearer {user2.access_token}'}
-        response = requests.put(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes', headers=header)
+        response = requests.post(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes/{user2.user_id}', headers=header)
         self.assertEqual(response.status_code, 201)
 
         # Get user likes
@@ -225,7 +227,7 @@ class TestAPI(unittest.TestCase):
 
         # User unlike recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}
-        response = requests.delete(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes', headers=header)
+        response = requests.delete(f'{URL}/recipes/{recipe_data["recipe_id"]}/likes/{user1.user_id}', headers=header)
         self.assertEqual(response.status_code, 204)
 
         # User doesn't have likes
@@ -239,7 +241,7 @@ class TestAPI(unittest.TestCase):
         header = {'Authorization': f'Bearer {user1.access_token}'}
         response = requests.get(f'{URL}/discover', headers=header)
         discover_data = response.json()
-        print(discover_data)
+        # print(discover_data)
 
         # Delete recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}

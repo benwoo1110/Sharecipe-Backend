@@ -158,8 +158,6 @@ def get_recipe_likes(func):
 
 def get_recipe_like(func):
     def wrapper(*args, **kwargs):
-        like: RecipeLike = RecipeLike.get_by_id(kwargs['recipe_id'], kwargs['account_id'])
-        if not like:
-            return make_response(jsonify(message='User did not like that recipe.'), 404)
+        like: RecipeLike = RecipeLike.get_by_id(kwargs['recipe_id'], kwargs['user_id'])
         return func(*args, like=like, **kwargs)
     return wrapper

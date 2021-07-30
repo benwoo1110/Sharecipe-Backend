@@ -441,19 +441,36 @@ class RecipeLikes(Resource):
     def get(self, recipe_id: int, likes: typing.List[RecipeLike]):
         return make_response(jsonify(likes), 200)
 
-    @jwt_required() 
-    @get_account_user_id
+
+class RecipeLikeUser(Resource):
+    @jwt_required()
     @check_recipe_exists
-    def put(self, recipe_id: int, account_id: int):
-        new_like = RecipeLike(recipe_id=recipe_id, user_id=account_id)
+    @check_user_exists
+    @get_recipe_like
+    def get(self, recipe_id: int, user_id: int, like: RecipeLike):
+        state = like is not None
+        return make_response(jsonify(state=state), 200)
+
+    @jwt_required()
+    @validate_account_user
+    @check_recipe_exists
+    @get_recipe_like
+    def post(self, recipe_id: int, user_id: int, like: RecipeLike):
+        if like is not None:
+            make_response(jsonify(message='Account already like that recipe.'), 400)
+
+        new_like = RecipeLike(recipe_id=recipe_id, user_id=user_id)
         new_like.add_to_db()
         return make_response(jsonify(new_like), 201)
 
     @jwt_required()
-    @get_account_user_id
+    @validate_account_user
     @check_recipe_exists
     @get_recipe_like
-    def delete(self, recipe_id: int, account_id: int, like: RecipeLike):
+    def delete(self, recipe_id: int, user_id: int, like: RecipeLike):
+        if like is None:
+            make_response(jsonify(message='Account did not like that recipe.'), 400)
+
         like.remove_from_db()
         return make_response('', 204)
 

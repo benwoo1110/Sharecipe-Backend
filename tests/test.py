@@ -162,7 +162,6 @@ class TestAPI(unittest.TestCase):
             difficulty=5,
             is_public=True
         )
-        print(recipe_data)
 
         # Get all recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}

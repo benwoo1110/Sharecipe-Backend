@@ -340,11 +340,11 @@ class Recipes(Resource):
 class RecipeTagSuggestions(Resource):
     @jwt_required()
     def get(self):
-        tagNames = DEFAULT_TAG_NAMES.copy()
+        tagNames = set(DEFAULT_TAG_NAMES)
         for tag, in RecipeTag.get_top_of(100):
-            tagNames.append(tag)
+            tagNames.add(tag.lower())
 
-        return make_response(jsonify(tagNames), 200)
+        return make_response(jsonify(list(tagNames)), 200)
 
 
 class RecipeData(Resource):

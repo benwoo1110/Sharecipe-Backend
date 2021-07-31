@@ -163,6 +163,11 @@ class TestAPI(unittest.TestCase):
             is_public=True
         )
 
+        # Get tag suggestions
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        response = requests.get(f'{URL}/recipes/tagsuggestions', headers=header, json=payload)
+        data = response.json()
+
         # Get all recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}
         response = requests.get(f'{URL}/users/{user3.user_id}/recipes', headers=header, json=payload)

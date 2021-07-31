@@ -49,6 +49,7 @@ api.add_resource(resources.UserRecipes,         '/users/<int:user_id>/recipes') 
 api.add_resource(resources.UserRecipeLikes,     '/users/<int:user_id>/recipes/likes') # GET
 
 api.add_resource(resources.Recipes,             '/recipes') # GET PUT
+api.add_resource(resources.RecipeTagSuggestions,'/recipes/tagsuggestions') # GET PUT
 api.add_resource(resources.RecipeData,          '/recipes/<int:recipe_id>') # GET PATCH DELETE
 api.add_resource(resources.RecipeSteps,         '/recipes/<int:recipe_id>/steps') # GET PATCH DELETE
 api.add_resource(resources.RecipeStepData,      '/recipes/<int:recipe_id>/steps/<int:step_num>') # GET PATCH DELETE

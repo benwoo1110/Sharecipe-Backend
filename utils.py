@@ -7,6 +7,29 @@ from jwt.exceptions import ExpiredSignatureError
 from PIL import Image
 
 
+DEFAULT_TAG_NAMES = [
+    'chinese',
+    'malay',
+    'indian',
+    'american',
+    'japanese',
+    'korean',
+    'italian',
+    'vietnamese',
+    'thai',
+    'rice',
+    'noodles',
+    'sandwich',
+    'burger',
+    'meat',
+    'vegetarian',
+    'seafood',
+    'snack',
+    'drink',
+    'dessert'
+]
+
+
 def obj_to_dict(obj, *fields):
     data = {}
     for field in fields:

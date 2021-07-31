@@ -5,7 +5,7 @@ from flask import json, jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
 from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, RecipeTag, Stats, User, UserFollow, Recipe, RevokedToken
-from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow
+from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow, DEFAULT_TAG_NAMES
 from file_manager import S3FileManager, LocalFileManager
 from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_follow, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
 import config
@@ -335,6 +335,16 @@ class Recipes(Resource):
         recipe.add_to_db()
 
         return make_response(jsonify(recipe), 201)
+
+
+class RecipeTagSuggestions(Resource):
+    @jwt_required()
+    def get(self):
+        tagNames = DEFAULT_TAG_NAMES.copy()
+        for tag, in RecipeTag.get_top_of(100):
+            tagNames.append(tag)
+
+        return make_response(jsonify(tagNames), 200)
 
 
 class RecipeData(Resource):

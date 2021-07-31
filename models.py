@@ -300,7 +300,7 @@ class RecipeLike(db.Model, EditableDb):
     time_created: datetime
     time_modified: datetime
 
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'), primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key = True)
 
     @classmethod

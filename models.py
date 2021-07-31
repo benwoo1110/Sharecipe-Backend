@@ -197,7 +197,7 @@ class Recipe(db.Model, EditableDb):
 
     @classmethod
     def get_all_public(cls, name):
-        return cls.query.filter(cls.name.lower().contains(name.lower()) & cls.is_public == True).all()
+        return cls.query.filter(cls.name.contains(name) & cls.is_public == True).all()
 
         #TODO dont load all data
         # q = db.session.query(cls.recipe_id, cls.user_id, cls.name, cls.icon).filter(cls.name.contains(name) & cls.public == True)

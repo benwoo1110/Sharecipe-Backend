@@ -4,7 +4,7 @@ import zipfile
 from flask import json, jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
-from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, User, UserFollow, Recipe, RevokedToken
+from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, Stats, User, UserFollow, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow
 from file_manager import S3FileManager, LocalFileManager
 from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_follow, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
@@ -174,6 +174,18 @@ class UserData(Resource):
     def patch(self, user_id: int, user: User, parsed_data: dict):
         user.update(**parsed_data)
         return obj_to_dict(user, 'user_id', 'username', 'bio'), 200
+
+
+class UserStats(Resource):
+    @jwt_required()
+    @check_user_exists
+    def get(self, user_id: int):
+        stats = []
+        stats.append(Stats(name="Follows", number=UserFollow.get_follows_count(user_id)))
+        stats.append(Stats(name="Follower", number=UserFollow.get_follower_count(user_id)))
+        stats.append(Stats(name="Liked recipes", number=RecipeLike.get_count_for_user(user_id)))
+        stats.append(Stats(name="Created recipes", number=Recipe.get_count_for_user(user_id)))
+        return make_response(jsonify(stats), 200)
 
 
 class UserProfileImage(Resource):

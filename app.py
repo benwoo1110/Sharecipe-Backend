@@ -39,6 +39,7 @@ api.add_resource(resources.AccountDelete,       '/account/delete') # POST
 
 api.add_resource(resources.Users,               '/users') # GET
 api.add_resource(resources.UserData,            '/users/<int:user_id>') # GET PATCH
+api.add_resource(resources.UserStats,            '/users/<int:user_id>/stats') # GET
 api.add_resource(resources.UserProfileImage,    '/users/<int:user_id>/profileimage') # GET PUT
 api.add_resource(resources.UserProfileImageId,  '/users/<int:user_id>/profileimage/id') # GET
 api.add_resource(resources.UserFollows,         '/users/<int:user_id>/follows') # GET

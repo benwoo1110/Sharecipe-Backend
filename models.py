@@ -119,6 +119,14 @@ class UserFollow(db.Model, EditableDb):
     def get_by_id(cls, user_id: int, follow_id: int):
         return cls.query.filter_by(user_id=user_id, follow_id=follow_id).first()
 
+    @classmethod
+    def get_follows_count(cls, user_id: int) -> int:
+        return cls.query.filter_by(user_id=user_id).count()
+
+    @classmethod
+    def get_follower_count(cls, follow_id: int) -> int:
+        return cls.query.filter_by(follow_id=follow_id).count()
+
 
 @dataclass
 class Recipe(db.Model, EditableDb):
@@ -200,6 +208,10 @@ class Recipe(db.Model, EditableDb):
         if not user_id:
             return db.session.query(cls.query.filter_by(recipe_id=recipe_id).exists()).scalar()
         return db.session.query(cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).exists()).scalar()
+
+    @classmethod
+    def get_count_for_user(cls, user_id: int) -> int:
+        return cls.query.filter_by(user_id=user_id).count()
 
 
 @dataclass
@@ -303,6 +315,10 @@ class RecipeLike(db.Model, EditableDb):
     def get_by_id(cls, recipe_id: int, user_id: int):
         return cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).first()
 
+    @classmethod
+    def get_count_for_user(cls, user_id: int) -> int:
+        return cls.query.filter_by(user_id=user_id).count()
+
 
 class RevokedToken(db.Model):
     __tablename__ = 'revoked_tokens'
@@ -328,3 +344,10 @@ class DiscoverSection:
     header: str
     size: str
     recipes: list
+
+
+@dataclass
+class Stats:
+
+    name: str
+    number: int

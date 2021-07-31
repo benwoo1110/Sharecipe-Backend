@@ -248,6 +248,12 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(like_data), 0)
 
+        # Get user stats
+        header = {'Authorization': f'Bearer {user3.access_token}'}
+        response = requests.get(f'{URL}/users/{user3.user_id}/stats', headers=header)
+        print(response.json())
+        self.assertEqual(response.status_code, 200)
+
         # Get the amazing discover page
         header = {'Authorization': f'Bearer {user1.access_token}'}
         response = requests.get(f'{URL}/discover', headers=header)

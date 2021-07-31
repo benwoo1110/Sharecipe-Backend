@@ -292,7 +292,11 @@ class UserRecipeLikes(Resource):
     @check_user_exists
     @get_user_recipe_likes
     def get(self, user_id: int, likes: typing.List[RecipeLike]):
-        return make_response(jsonify(likes), 200)
+        recipes = []
+        for like in likes:
+            recipes.append(Recipe.get_by_id(like.recipe_id))
+
+        return make_response(jsonify(recipes), 200)
 
 
 class Recipes(Resource):

@@ -144,6 +144,7 @@ class Recipe(db.Model, EditableDb):
     steps: list
     ingredients: list
     images: list
+    tags: list
     time_created: datetime
     time_modified: datetime
 
@@ -158,6 +159,7 @@ class Recipe(db.Model, EditableDb):
     steps = db.relationship('RecipeStep', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
     ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
     images = db.relationship('RecipeImage', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
+    tags = db.relationship('RecipeTag', backref='recipe', lazy=True, cascade="save-update, merge, delete, delete-orphan")
 
     @hybrid_property
     def icon(self):
@@ -318,6 +320,24 @@ class RecipeLike(db.Model, EditableDb):
     @classmethod
     def get_count_for_user(cls, user_id: int) -> int:
         return cls.query.filter_by(user_id=user_id).count()
+
+
+
+@dataclass
+class RecipeTag(db.Model, EditableDb):
+    __tablename__ = 'recipe_tags'
+
+    tag_id: int
+    recipe_id: int
+    name: str
+
+    tag_id = db.Column(db.Integer, primary_key = True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
+    name = db.Column(db.String(256), nullable = False)
+
+    @classmethod
+    def get_top_of(cls, limit: int = 50):
+        return cls.query.with_entities(cls.name).distinct(cls.name).limit(limit).all() 
 
 
 class RevokedToken(db.Model):

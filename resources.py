@@ -4,7 +4,7 @@ import zipfile
 from flask import json, jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
-from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, Stats, User, UserFollow, Recipe, RevokedToken
+from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, RecipeTag, Stats, User, UserFollow, Recipe, RevokedToken
 from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow
 from file_manager import S3FileManager, LocalFileManager
 from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_follow, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
@@ -61,6 +61,10 @@ recipe_image_parser = JsonParser()
 recipe_image_parser.add_arg('image_ids', ctype=list)
 
 
+recipe_tag_parser = JsonParser()
+recipe_tag_parser.add_arg('name')
+
+
 recipe_parser = JsonParser()
 recipe_parser.add_arg('name')
 recipe_parser.add_arg('description', required=False)
@@ -70,6 +74,7 @@ recipe_parser.add_arg('total_time_needed', required=False, ctype=int)
 recipe_parser.add_arg('is_public', required=False, ctype=bool)
 recipe_parser.add_nested_parser('steps', recipe_step_parser, required=False)
 recipe_parser.add_nested_parser('ingredients', recipe_ingredients_parser, required=False)
+recipe_parser.add_nested_parser('tags', recipe_tag_parser, required=False)
 
 
 class HelloWorld(Resource):
@@ -320,6 +325,12 @@ class Recipes(Resource):
                 ingredients.append(RecipeIngredient(**ingredient_data))
             parsed_data['ingredients'] = ingredients
 
+        if parsed_data.get('tags'):
+            tags = []
+            for tag_data in parsed_data.get('tags'):
+                tags.append(RecipeTag(**tag_data))
+            parsed_data['tags'] = tags
+
         recipe = Recipe(user_id=account_id, **parsed_data)
         recipe.add_to_db()
 
@@ -348,6 +359,12 @@ class RecipeData(Resource):
             for step_data in parsed_data.get('ingredients'):
                 steps.append(RecipeIngredient(**step_data))
             parsed_data['ingredients'] = steps
+
+        if parsed_data.get('tags'):
+            tags = []
+            for tag_data in parsed_data.get('tags'):
+                tags.append(RecipeTag(**tag_data))
+            parsed_data['tags'] = tags
 
         recipe.update(**parsed_data)
         return make_response(jsonify(recipe), 200)

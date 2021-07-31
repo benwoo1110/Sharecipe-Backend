@@ -144,6 +144,11 @@ class TestAPI(unittest.TestCase):
             'ingredients': [
                 {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
                 {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+            ],
+            'tags': [
+                {'name': 'edible'},
+                {'name': 'tasty'},
+                {'name': 'modern'}
             ]
         }
         response = requests.put(f'{URL}/recipes', headers=header, json=payload)
@@ -157,6 +162,7 @@ class TestAPI(unittest.TestCase):
             difficulty=5,
             is_public=True
         )
+        print(recipe_data)
 
         # Get all recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}

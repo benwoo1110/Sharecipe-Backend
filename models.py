@@ -174,6 +174,10 @@ class Recipe(db.Model, EditableDb):
         for like in RecipeLike.get_for_recipe_id(self.recipe_id):
             db.session.delete(like)
 
+        # Remove reviews
+        for review in RecipeReview.get_for_recipe(self.recipe_id):
+            db.session.delete(review)
+
         db.session.delete(self)
         
         if commit:
@@ -322,7 +326,6 @@ class RecipeLike(db.Model, EditableDb):
         return cls.query.filter_by(user_id=user_id).count()
 
 
-
 @dataclass
 class RecipeTag(db.Model, EditableDb):
     __tablename__ = 'recipe_tags'
@@ -338,6 +341,29 @@ class RecipeTag(db.Model, EditableDb):
     @classmethod
     def get_top_of(cls, limit: int = 50):
         return cls.query.with_entities(cls.name).distinct(cls.name).limit(limit).all() 
+
+
+@dataclass
+class RecipeReview(db.Model, EditableDb):
+    __tablename__ = 'recipe_reviews'
+
+    recipe_id: int
+    user_id: int
+    rating: int
+    comment: str
+
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'), primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key = True)
+    rating = db.Column(db.Integer, nullable = False)
+    comment = db.Column(db.String(1024), nullable = True)
+
+    @classmethod
+    def get_for_recipe(cls, recipe_id: int):
+        return cls.query.filter_by(recipe_id=recipe_id).all()
+
+    @classmethod
+    def get_by_id(cls, recipe_id: int, user_id: int):
+        return cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).all()
 
 
 class RevokedToken(db.Model):

@@ -4,7 +4,7 @@ import zipfile
 from flask import json, jsonify, make_response, send_file
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
-from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, RecipeTag, Stats, User, UserFollow, Recipe, RevokedToken
+from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, RecipeTag, Stats, User, UserFollow, Recipe, RecipeReview, RevokedToken
 from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow, DEFAULT_TAG_NAMES
 from file_manager import S3FileManager, LocalFileManager
 from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_follow, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
@@ -63,6 +63,11 @@ recipe_image_parser.add_arg('image_ids', ctype=list)
 
 recipe_tag_parser = JsonParser()
 recipe_tag_parser.add_arg('name')
+
+
+recipe_review_parser = JsonParser()
+recipe_review_parser.add_arg('rating', ctype=int)
+recipe_review_parser.add_arg('comment')
 
 
 recipe_parser = JsonParser()
@@ -534,6 +539,26 @@ class RecipeLikeUser(Resource):
 
         like.remove_from_db()
         return make_response('', 204)
+
+
+class RecipeReviews(Resource):
+    @jwt_required()
+    @check_recipe_exists
+    def get(self, recipe_id: int):
+        reviews = RecipeReview.get_for_recipe(recipe_id)
+        return make_response(jsonify(reviews), 200)
+
+    @jwt_required()
+    @get_account_user_id
+    @recipe_review_parser.parse()
+    def put(self, recipe_id: int, account_id, parsed_data: dict):
+        review = RecipeReview.get_by_id(recipe_id, account_id)
+        if review is not None:
+            make_response(jsonify(message='Account already reviewed this recipe.'), 400)
+
+        new_review = RecipeReview(recipe_id=recipe_id, user_id=account_id, **parsed_data)
+        new_review.add_to_db()
+        return make_response(jsonify(new_review), 201)
 
 
 class Search(Resource):

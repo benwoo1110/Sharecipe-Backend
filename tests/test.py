@@ -163,14 +163,29 @@ class TestAPI(unittest.TestCase):
             is_public=True
         )
 
+        # Add a new review
+        header = {'Authorization': f'Bearer {user1.access_token}'}
+        payload = {
+            'rating': 4,
+            'comment': 'this is the best recipe!'
+        }
+        response = requests.put(f'{URL}/recipes/{recipe_data["recipe_id"]}/reviews', headers=header, json=payload)
+        self.assertEqual(response.status_code, 201)
+
+        # Get reviews
+        response = requests.get(f'{URL}/recipes/{recipe_data["recipe_id"]}/reviews', headers=header)
+        review_data = response.json()
+        self.assertEqual(response.status_code, 200)
+        print(review_data)
+
         # Get tag suggestions
         header = {'Authorization': f'Bearer {user1.access_token}'}
-        response = requests.get(f'{URL}/recipes/tagsuggestions', headers=header, json=payload)
+        response = requests.get(f'{URL}/recipes/tagsuggestions', headers=header)
         data = response.json()
 
         # Get all recipe
         header = {'Authorization': f'Bearer {user1.access_token}'}
-        response = requests.get(f'{URL}/users/{user3.user_id}/recipes', headers=header, json=payload)
+        response = requests.get(f'{URL}/users/{user3.user_id}/recipes', headers=header)
         data = response.json()
 
         # Get recipe data

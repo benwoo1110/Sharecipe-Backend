@@ -58,6 +58,7 @@ api.add_resource(resources.RecipeImageData,     '/recipes/<int:recipe_id>/images
 api.add_resource(resources.RecipeIcon,          '/recipes/<int:recipe_id>/icon') # GET
 api.add_resource(resources.RecipeLikes,         '/recipes/<int:recipe_id>/likes') # GET
 api.add_resource(resources.RecipeLikeUser,      '/recipes/<int:recipe_id>/likes/<int:user_id>') # GET POST DELETE
+api.add_resource(resources.RecipeReviews,       '/recipes/<int:recipe_id>/reviews') # GET PUT
 
 api.add_resource(resources.Search,              '/search') # GET
 api.add_resource(resources.Discover,            '/discover') # GET

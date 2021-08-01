@@ -552,9 +552,10 @@ class RecipeReviews(Resource):
     @get_account_user_id
     @recipe_review_parser.parse()
     def put(self, recipe_id: int, account_id, parsed_data: dict):
-        review = RecipeReview.get_by_id(recipe_id, account_id)
+        review: RecipeReview = RecipeReview.get_by_id(recipe_id, account_id)
         if review is not None:
-            make_response(jsonify(message='Account already reviewed this recipe.'), 400)
+            review.update(**parsed_data)
+            return make_response(jsonify(review), 200)
 
         new_review = RecipeReview(recipe_id=recipe_id, user_id=account_id, **parsed_data)
         new_review.add_to_db()

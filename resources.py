@@ -58,7 +58,7 @@ recipe_step_parser.add_arg('description')
 
 
 recipe_image_parser = JsonParser()
-recipe_image_parser.add_arg('image_ids', ctype=list)
+recipe_image_parser.add_arg('image_ids')
 
 
 recipe_tag_parser = JsonParser()

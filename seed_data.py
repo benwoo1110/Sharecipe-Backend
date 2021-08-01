@@ -36,6 +36,9 @@ response = requests.put(f'{URL}/users/{dummy.user_id}/profileimage', headers=hea
 # Add pizza recipe
 payload = {
     'name': 'Round Pizza',
+    'description': 'A pizza',
+    'total_time_needed': 3600,
+    'portion': 3,
     'difficulty': 5,
     'is_public': True,
     'steps': [
@@ -45,6 +48,10 @@ payload = {
     'ingredients': [
         {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
         {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+    ],
+    'tags': [
+        {'name': 'italian'},
+        {'name': 'western'}
     ]
 }
 

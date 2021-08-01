@@ -63,6 +63,7 @@ class JsonParser:
                 return value
 
             if ctype is not None and not isinstance(value, ctype):
+                print(value, type(value))
                 raise ValueError(f'{name} is of incorrect format!')
             return value
 

@@ -466,8 +466,10 @@ class RecipeImages(Resource):
     @validate_account_recipe
     @recipe_image_parser.parse()
     def delete(self, recipe_id: int, parsed_data: dict):
-        recipe_images = RecipeImage.get_for_ids(set(parsed_data['image_ids']))
-        for recipe_image in recipe_images:
+        print(parsed_data)
+        for image in parsed_data['image_ids']:
+            print(image.get('file_id'))
+            recipe_image = RecipeImage.get_by_id(recipe_id, image["file_id"])
             file_manager.delete(recipe_image.file_id)
             recipe_image.remove_from_db()
 

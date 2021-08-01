@@ -250,7 +250,7 @@ class RecipeIngredient(db.Model, EditableDb):
     ingredient_id: int
     recipe_id: int
     name: str
-    quantity: int
+    quantity: float
     unit: str
     time_created: datetime
     time_modified: datetime
@@ -258,7 +258,7 @@ class RecipeIngredient(db.Model, EditableDb):
     ingredient_id = db.Column(db.Integer, primary_key = True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.recipe_id'))
     name = db.Column(db.String(256), nullable = False)
-    quantity = db.Column(db.Integer, nullable = True)
+    quantity = db.Column(db.Float, nullable = True)
     unit = db.Column(db.String(32), nullable = True)
 
 

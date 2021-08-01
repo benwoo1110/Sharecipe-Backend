@@ -48,7 +48,7 @@ recipe_images_parser.add_arg('recipe_images_ids', required=False, ctype=list)
 
 recipe_ingredients_parser = JsonParser()
 recipe_ingredients_parser.add_arg('name')
-recipe_ingredients_parser.add_arg('quantity', ctype=int)
+recipe_ingredients_parser.add_arg('quantity', ctype=float)
 recipe_ingredients_parser.add_arg('unit', required=False)
 
 
@@ -466,9 +466,7 @@ class RecipeImages(Resource):
     @validate_account_recipe
     @recipe_image_parser.parse()
     def delete(self, recipe_id: int, parsed_data: dict):
-        print(parsed_data)
         for image in parsed_data['image_ids']:
-            print(image.get('file_id'))
             recipe_image = RecipeImage.get_by_id(recipe_id, image["file_id"])
             file_manager.delete(recipe_image.file_id)
             recipe_image.remove_from_db()

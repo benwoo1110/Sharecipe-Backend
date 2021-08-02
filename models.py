@@ -64,8 +64,12 @@ class User(db.Model, EditableDb):
             db.session.delete(follow)
 
         # Remove followers
-        for follow in UserFollow.get_for_follow_id(self.user_id):
-            db.session.delete(follow)
+        for follower in UserFollow.get_for_follow_id(self.user_id):
+            db.session.delete(follower)
+
+        # Remove reviews
+        for review in RecipeReview.get_for_user(self.user_id):
+            db.session.delete(review)
 
         db.session.commit()
 
@@ -368,6 +372,10 @@ class RecipeReview(db.Model, EditableDb):
     @classmethod
     def get_for_recipe(cls, recipe_id: int):
         return cls.query.filter_by(recipe_id=recipe_id).all()
+
+    @classmethod
+    def get_for_user(cls, user_id: int):
+        return cls.query.filter_by(user_id=user_id).all()
 
     @classmethod
     def get_by_id(cls, recipe_id: int, user_id: int):

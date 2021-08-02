@@ -2,7 +2,7 @@ import requests
 
 
 PRODUCTION_MODE = False
-URL = 'https://sharecipe-production.herokuapp.com' if PRODUCTION_MODE else 'https://sharecipe-backend.herokuapp.com'
+URL = 'https://sharecipe-production.herokuapp.com' if PRODUCTION_MODE else 'http://127.0.0.1:5000'
 
 
 class Account:
@@ -23,7 +23,7 @@ class Account:
 
 
 # Create user
-dummy = Account.add('Ben 10', '1234', 'Code. Create. Coordinate.')
+dummy = Account.add('Ben 1000', '1234', 'Code. Create. Coordinate.')
 header = {'Authorization': f'Bearer {dummy.access_token}'}
 
 
@@ -46,8 +46,8 @@ payload = {
         {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
-        {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
-        {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+        {'name': 'Egg', 'quantity': 10.0, 'unit': 'grams'},
+        {'name': 'Water', 'quantity': 10.0, 'unit': 'kg'}
     ],
     'tags': [
         {'name': 'italian'},
@@ -76,8 +76,8 @@ payload = {
         {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
-        {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
-        {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+        {'name': 'Egg', 'quantity': 10.9, 'unit': 'grams'},
+        {'name': 'Water', 'quantity': 5.0, 'unit': 'kg'}
     ]
 }
 
@@ -102,8 +102,8 @@ payload = {
         {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
-        {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
-        {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+        {'name': 'Egg', 'quantity': 10.0, 'unit': 'grams'},
+        {'name': 'Water', 'quantity': 5.8, 'unit': 'kg'}
     ]
 }
 
@@ -128,8 +128,8 @@ payload = {
         {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
-        {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
-        {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+        {'name': 'Egg', 'quantity': 10.8, 'unit': 'grams'},
+        {'name': 'Water', 'quantity': 5.9, 'unit': 'kg'}
     ]
 }
 
@@ -154,8 +154,8 @@ payload = {
         {'step_number': 2, 'description': 'Add egg.'}
     ],
     'ingredients': [
-        {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
-        {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+        {'name': 'Egg', 'quantity': 10.7, 'unit': 'grams'},
+        {'name': 'Water', 'quantity': 5.9, 'unit': 'kg'}
     ]
 }
 

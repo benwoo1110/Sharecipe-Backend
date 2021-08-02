@@ -589,8 +589,8 @@ class Discover(Resource):
             tag_names = tag_names[:5]
 
         for name, in tag_names:
-            recipe_ids = [tag.recipe_id for tag in RecipeTag.get_for_name(name)]
-            recipes = Recipe.get_for_ids(set(recipe_ids))
+            recipe_ids = [int(tag.recipe_id) for tag in RecipeTag.get_for_name(name)]
+            recipes = Recipe.get_for_ids(recipe_ids)
             discovers.append(DiscoverSection(header=name, size="normal", recipes=recipes))
 
         return make_response(jsonify(sections=discovers), 200)

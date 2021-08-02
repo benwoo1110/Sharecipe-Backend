@@ -211,7 +211,7 @@ class Recipe(db.Model, EditableDb):
 
     @classmethod
     def get_for_ids(cls, recipe_ids: typing.Union[list, set]):
-        return cls.query.filter(RecipeImage.recipe_id in recipe_ids).all()
+        return cls.query.filter(cls.recipe_id.in_(recipe_ids)).all()
 
     @classmethod
     def check_exist(cls, recipe_id: int, user_id: int = None):

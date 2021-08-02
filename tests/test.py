@@ -142,8 +142,8 @@ class TestAPI(unittest.TestCase):
                 {'step_number': 2, 'description': 'Add egg.'}
             ],
             'ingredients': [
-                {'name': 'Egg', 'quantity': 10, 'unit': 'grams'},
-                {'name': 'Water', 'quantity': 5, 'unit': 'kg'}
+                {'name': 'Egg', 'quantity': 10.0, 'unit': 'grams'},
+                {'name': 'Water', 'quantity': 5.0, 'unit': 'kg'}
             ],
             'tags': [
                 {'name': 'edible'},
@@ -283,7 +283,7 @@ class TestAPI(unittest.TestCase):
         header = {'Authorization': f'Bearer {user1.access_token}'}
         response = requests.get(f'{URL}/discover', headers=header)
         discover_data = response.json()
-        # print(discover_data)
+        print(discover_data)
 
         # Delete recipe
         header = {'Authorization': f'Bearer {user3.access_token}'}

@@ -1,7 +1,9 @@
 import re
 import typing
 import zipfile
+import random
 from flask import json, jsonify, make_response, send_file
+from flask.json import tag
 from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
 from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, RecipeTag, Stats, User, UserFollow, Recipe, RecipeReview, RevokedToken
@@ -577,13 +579,18 @@ class Search(Resource):
 
 class Discover(Resource):
     @jwt_required()
-    @get_account_user_id
-    def get(self, account_id):
-        recipes = Recipe.get_all_public('')
+    def get(self):
         discovers = []
-        discovers.append(DiscoverSection(header="Latest", size="large", recipes=recipes))
-        discovers.append(DiscoverSection(header="Chicken", size="normal", recipes=recipes))
-        discovers.append(DiscoverSection(header="Drinks", size="normal", recipes=recipes))
-        discovers.append(DiscoverSection(header="Supper", size="normal", recipes=recipes))
-        discovers.append(DiscoverSection(header="Munch", size="normal", recipes=recipes))
+        discovers.append(DiscoverSection(header="Latest", size="large", recipes=Recipe.get_all_public('', 5)))
+
+        tag_names = RecipeTag.get_top_of(20)
+        random.shuffle(tag_names)
+        if len(tag_names) > 5:
+            tag_names = tag_names[:5]
+
+        for name, in tag_names:
+            recipe_ids = [tag.recipe_id for tag in RecipeTag.get_for_name(name)]
+            recipes = Recipe.get_for_ids(set(recipe_ids))
+            discovers.append(DiscoverSection(header=name, size="normal", recipes=recipes))
+
         return make_response(jsonify(sections=discovers), 200)

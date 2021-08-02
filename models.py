@@ -202,12 +202,16 @@ class Recipe(db.Model, EditableDb):
         return cls.query.filter(cls.name.startswith(name)).all()
 
     @classmethod
-    def get_all_public(cls, name):
-        return cls.query.filter(cls.name.contains(name) & cls.is_public == True).all()
+    def get_all_public(cls, name, limit: int = 50):
+        return cls.query.filter(cls.name.contains(name) & cls.is_public == True).limit(limit).all()
 
         #TODO dont load all data
         # q = db.session.query(cls.recipe_id, cls.user_id, cls.name, cls.icon).filter(cls.name.contains(name) & cls.public == True)
         # return [r._asdict() for r in q.all()]
+
+    @classmethod
+    def get_for_ids(cls, recipe_ids: typing.Union[list, set]):
+        return cls.query.filter(RecipeImage.recipe_id in recipe_ids).all()
 
     @classmethod
     def check_exist(cls, recipe_id: int, user_id: int = None):
@@ -341,6 +345,10 @@ class RecipeTag(db.Model, EditableDb):
     @classmethod
     def get_top_of(cls, limit: int = 50):
         return cls.query.with_entities(cls.name).distinct(cls.name).limit(limit).all() 
+
+    @classmethod
+    def get_for_name(cls, name: str, limit: int = 10):
+        return cls.query.filter_by(name=name).limit(limit).all()
 
 
 @dataclass

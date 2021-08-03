@@ -166,7 +166,7 @@ class AccountDelete(Resource):
         if parsed_data.get('user_id') != user.user_id:
             return make_response('Invalid account user.', 400)
         
-        if not user.verify_password(parsed_data.get('password'), ''):
+        if not user.verify_password(parsed_data.get('password', '')):
             return make_response('Incorrect password.', 400)
 
         jti = get_jwt()['jti']

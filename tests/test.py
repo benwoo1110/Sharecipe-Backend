@@ -7,20 +7,23 @@ URL = 'https://sharecipe-backend.herokuapp.com' if use_production else 'http://1
 
 
 class Account:
-    def __init__(self, user_id, access_token, refresh_token):
+    def __init__(self, username, password, user_id, access_token, refresh_token):
+        self.username = username
+        self.password = password
         self.user_id = user_id
         self.access_token = access_token
         self.refresh_token = refresh_token
 
     def delete(self):
         header = {'Authorization': f'Bearer {self.refresh_token}'}
-        response = requests.delete(f'{URL}/account/delete', headers=header)
+        payload = {'user_id': self.user_id, 'password': self.password}
+        response = requests.delete(f'{URL}/account/delete', headers=header, json=payload)
 
     @classmethod
     def add(cls, username, password, bio=None):
         payload = {'username': username, 'password': password, 'bio': bio}
         response = requests.post(f'{URL}/account/register', json=payload)
-        return cls(**response.json())
+        return cls(username=username, password=password, **response.json())
 
 
 class TestAPI(unittest.TestCase):
@@ -93,6 +96,7 @@ class TestAPI(unittest.TestCase):
         payload = {'old_password': '123456', 'new_password': '654321'}
         response = requests.post(f'{URL}/account/changepassword', headers=header, json=payload)
         self.assertEqual(response.status_code, 204)
+        user2.password = '654321'
 
         # Try login
         payload = {'username': 'testing456', 'password': '654321'}

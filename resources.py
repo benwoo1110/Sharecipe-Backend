@@ -27,6 +27,11 @@ account_password_parser.add_arg('old_password')
 account_password_parser.add_arg('new_password')
 
 
+account_delete_parser = JsonParser()
+account_delete_parser.add_arg('user_id', ctype=int)
+account_delete_parser.add_arg('password')
+
+
 users_parser = JsonParser()
 users_parser.add_arg('user_ids', required=False, ctype=list)
 
@@ -156,7 +161,14 @@ class AccountLogout(Resource):
 class AccountDelete(Resource):
     @jwt_required(refresh=True)
     @get_account_user
-    def delete(self, user: User):
+    @account_delete_parser.parse()
+    def delete(self, user: User, parsed_data: dict):
+        if parsed_data.get('user_id') != user.user_id:
+            return make_response('Invalid account user.', 400)
+        
+        if not user.verify_password(parsed_data.get('password'), ''):
+            return make_response('Incorrect password.', 400)
+
         jti = get_jwt()['jti']
         revoked_token = RevokedToken(jti = jti)
         revoked_token.add()

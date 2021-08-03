@@ -5,6 +5,7 @@ from flask.json import JSONEncoder
 from flask_restful import request, abort, Api
 from jwt.exceptions import ExpiredSignatureError
 from PIL import Image
+import config
 
 
 DEFAULT_TAG_NAMES = [
@@ -131,6 +132,9 @@ class ApiHandler(Api):
             return make_response(jsonify(message='Access token expired! Please re-login.'), 403)
         
         elif isinstance(e, Exception):
-            return make_response(jsonify(message='An unknown error occurred!'), 500)
+            if config.PRODUCTION_MODE:
+                return make_response(jsonify(message='An unknown error occurred!'), 500)
+            else:
+                return make_response(jsonify(message=str(e)), 500)
 
         return original_handler(e)

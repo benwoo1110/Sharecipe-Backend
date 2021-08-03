@@ -128,5 +128,9 @@ class BetterJSONEncoder(JSONEncoder):
 class ApiHandler(Api):
     def error_router(self, original_handler, e):
         if self._has_fr_route() and isinstance(e, ExpiredSignatureError):
-            return jsonify({'message': 'Access token expired!'}), 403
+            return make_response(jsonify(message='Access token expired! Please re-login.'), 403)
+        
+        elif isinstance(e, Exception):
+            return make_response(jsonify(message='An unknown error occurred!'), 500)
+
         return original_handler(e)

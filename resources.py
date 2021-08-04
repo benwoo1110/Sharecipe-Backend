@@ -598,7 +598,8 @@ class Search(Resource):
 
 class Discover(Resource):
     @jwt_required()
-    def get(self):
+    @get_account_user_id
+    def get(self, account_id: int):
         discovers = []
         discovers.append(DiscoverSection(header="Latest", size="large", recipes=Recipe.get_all_public('', 5)))
 
@@ -611,5 +612,19 @@ class Discover(Resource):
             recipe_ids = [int(tag.recipe_id) for tag in RecipeTag.get_for_name(name)]
             recipes = Recipe.get_for_ids(recipe_ids)
             discovers.append(DiscoverSection(header=name, size="normal", recipes=recipes))
+
+        follows: typing.List[UserFollow] = UserFollow.get_for_user_id(account_id)
+        if len(follows) > 5:
+            follows = follows[:5]
+
+        for follow in follows:
+            user: User = user.get_by_id(follow.follow_id)
+            discovers.append(DiscoverSection(
+                header="Made by " + user.username, 
+                size="normal", 
+                recipes=Recipe.get_for_user_id(follow.follow_id)
+            ))
+
+        random.shuffle(discovers)
 
         return make_response(jsonify(sections=discovers), 200)

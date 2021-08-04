@@ -196,8 +196,11 @@ class UserData(Resource):
     @get_user
     @user_parser.parse()
     def patch(self, user_id: int, user: User, parsed_data: dict):
+        if User.get_by_username(parsed_data['username']):
+            return make_response(jsonify(message='Username already exist.'), 400)
+
         user.update(**parsed_data)
-        return obj_to_dict(user, 'user_id', 'username', 'bio'), 200
+        return make_response(jsonify(user), 200)
 
 
 class UserStats(Resource):

@@ -611,7 +611,7 @@ class Discover(Resource):
         for name, in tag_names:
             recipe_ids = [int(tag.recipe_id) for tag in RecipeTag.get_for_name(name)]
             recipes = Recipe.get_for_ids(recipe_ids)
-            discovers.append(DiscoverSection(header=name, size="normal", recipes=recipes))
+            discovers.append(DiscoverSection(header=name.capitalize(), size="normal", recipes=recipes))
 
         follows: typing.List[UserFollow] = UserFollow.get_for_user_id(account_id)
         random.shuffle(follows)

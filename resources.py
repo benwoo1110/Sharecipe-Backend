@@ -618,7 +618,7 @@ class Discover(Resource):
             follows = follows[:5]
 
         for follow in follows:
-            user: User = user.get_by_id(follow.follow_id)
+            user: User = User.get_by_id(follow.follow_id)
             discovers.append(DiscoverSection(
                 header="Made by " + user.username, 
                 size="normal", 

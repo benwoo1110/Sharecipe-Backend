@@ -71,3 +71,6 @@ class LocalFileManager:
         cached = self.get_local_path(file_id)
         if path.isfile(cached):
             os.remove(cached)
+
+
+file_manager = S3FileManager() if config.PRODUCTION_MODE else LocalFileManager()

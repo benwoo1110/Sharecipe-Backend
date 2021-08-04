@@ -6,7 +6,7 @@ from app import db
 from passlib.hash import pbkdf2_sha256 as sha256
 from dataclasses import dataclass
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-
+from file_manager import file_manager
 
 class EditableDb:
 
@@ -70,6 +70,10 @@ class User(db.Model, EditableDb):
         # Remove reviews
         for review in RecipeReview.get_for_user(self.user_id):
             db.session.delete(review)
+
+        # Delete profile picture
+        if self.profile_image_id:
+            file_manager.delete(self.profile_image_id)
 
         db.session.commit()
 
@@ -181,6 +185,10 @@ class Recipe(db.Model, EditableDb):
         # Remove reviews
         for review in RecipeReview.get_for_recipe(self.recipe_id):
             db.session.delete(review)
+
+        # Delete images
+        for image in self.images:
+            file_manager.delete(image.file_id)
 
         db.session.delete(self)
         

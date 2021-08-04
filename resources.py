@@ -8,12 +8,9 @@ from flask_restful import Resource, request
 from flask_jwt_extended import jwt_required, create_access_token, create_refresh_token, get_jwt
 from models import DiscoverSection, RecipeImage, RecipeIngredient, RecipeLike, RecipeStep, RecipeTag, Stats, User, UserFollow, Recipe, RecipeReview, RevokedToken
 from utils import JsonParser, obj_to_dict, sanitize_image_with_pillow, DEFAULT_TAG_NAMES
-from file_manager import S3FileManager, LocalFileManager
+from file_manager import file_manager
 from middleware import check_recipe_exists, check_user_exists, get_account_user, get_account_user_id, get_query_string, get_recipe, get_recipe_image, get_recipe_images, get_recipe_like, get_recipe_likes, get_recipe_step, get_recipe_steps, get_user, get_user_follow, get_user_followers, get_user_recipes, validate_account_recipe, validate_account_user, get_user_follows, get_user_recipe_likes
 import config
-
-
-file_manager = S3FileManager() if config.PRODUCTION_MODE else LocalFileManager()
 
 
 account_parser = JsonParser()
@@ -235,8 +232,11 @@ class UserProfileImage(Resource):
             return make_response(jsonify(message='No image uploaded.'), 400)
         
         profile_image = sanitize_image_with_pillow(uploaded_file)
-
         file_id = file_manager.save(profile_image)
+
+        if user.profile_image_id:
+            file_id = file_manager.delete(user.profile_image_id)
+
         user.update(profile_image_id=file_id)
         return make_response(jsonify(message='Profile picture uploaded.'), 200)
 

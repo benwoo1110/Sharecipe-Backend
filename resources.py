@@ -139,7 +139,7 @@ class AccountPassword(Resource):
     @account_password_parser.parse()
     def post(self, user: User, parsed_data: dict):
         if not user.verify_password(parsed_data.get('old_password')):
-            return make_response(jsonify(message='Incorrect username or password.'), 400)
+            return make_response(jsonify(message='Incorrect password. Change aborted.'), 400)
 
         password_hash = User.hash_password(parsed_data.get('new_password'))
         user.update(password_hash=password_hash)

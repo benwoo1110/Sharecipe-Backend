@@ -266,7 +266,9 @@ class UserFollows(Resource):
     @check_user_exists
     @get_user_follows
     def get(self, user_id: int, user_follows: typing.List[UserFollow]):
-        return make_response(jsonify(user_follows), 200)
+        user_ids = set(follow.user_id for follow in user_follows)
+        users = User.get_all_of_ids(user_ids)
+        return make_response(jsonify(users), 200)
 
 
 class UserFollowers(Resource):
@@ -274,7 +276,9 @@ class UserFollowers(Resource):
     @check_user_exists
     @get_user_followers
     def get(self, user_id: int, user_followers: typing.List[UserFollow]):
-        return make_response(jsonify(user_followers), 200)
+        user_ids = set(follow.user_id for follow in user_followers)
+        users = User.get_all_of_ids(user_ids)
+        return make_response(jsonify(users), 200)
 
 
 class UserFollowUser(Resource):

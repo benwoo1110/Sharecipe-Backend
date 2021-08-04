@@ -85,8 +85,8 @@ class User(db.Model, EditableDb):
         return cls.query.filter_by(username = username).first()
 
     @classmethod
-    def get_all_of_ids(cls, user_ids: list):
-        return cls.query.filter(not user_ids or cls.user_id in user_ids).all()
+    def get_all_of_ids(cls, user_ids: typing.Union[list, set]):
+        return cls.query.filter(cls.user_id.in_(user_ids)).all()
 
     @classmethod
     def get_all_public(cls, name):

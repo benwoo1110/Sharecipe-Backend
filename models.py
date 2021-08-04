@@ -416,3 +416,4 @@ class Stats:
 
     name: str
     number: int
+    stats_type: str

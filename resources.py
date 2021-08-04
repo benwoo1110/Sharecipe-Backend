@@ -208,10 +208,10 @@ class UserStats(Resource):
     @check_user_exists
     def get(self, user_id: int):
         stats = []
-        stats.append(Stats(name="Follows", number=UserFollow.get_follows_count(user_id)))
-        stats.append(Stats(name="Follower", number=UserFollow.get_follower_count(user_id)))
-        stats.append(Stats(name="Liked recipes", number=RecipeLike.get_count_for_user(user_id)))
-        stats.append(Stats(name="Created recipes", number=Recipe.get_count_for_user(user_id)))
+        stats.append(Stats(name="Follows", stats_type="follow", number=UserFollow.get_follows_count(user_id)))
+        stats.append(Stats(name="Follower", stats_type="follower", number=UserFollow.get_follower_count(user_id)))
+        stats.append(Stats(name="Liked recipes", stats_type="liked_recipe", number=RecipeLike.get_count_for_user(user_id)))
+        stats.append(Stats(name="Created recipes", stats_type="user_recipe", number=Recipe.get_count_for_user(user_id)))
         return make_response(jsonify(stats), 200)
 
 

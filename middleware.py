@@ -88,7 +88,8 @@ def get_user_follow(func):
 
 def get_user_recipes(func):
     def wrapper(*args, **kwargs):
-        recipes: typing.List[dict] = Recipe.get_for_user_id(kwargs['user_id'])
+        account_user_id: int = get_jwt_identity()
+        recipes: typing.List[dict] = Recipe.get_for_user_id(kwargs['user_id'], account_user_id != kwargs['user_id'])
         return func(*args, recipes=recipes, **kwargs)
     return wrapper
 

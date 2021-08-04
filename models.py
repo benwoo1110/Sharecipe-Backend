@@ -188,8 +188,11 @@ class Recipe(db.Model, EditableDb):
             db.session.commit()
 
     @classmethod
-    def get_for_user_id(cls, user_id: int):
-        return cls.query.filter_by(user_id=user_id).all() 
+    def get_for_user_id(cls, user_id: int, public_only: bool = True):
+        if public_only:
+            return cls.query.filter_by(user_id=user_id, is_public=True).all() 
+        else:
+            return cls.query.filter_by(user_id=user_id).all() 
 
         #TODO dont load all data
         # q = db.session.query(cls.recipe_id, cls.user_id, cls.name).filter_by(user_id=user_id)

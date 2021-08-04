@@ -227,7 +227,9 @@ class Recipe(db.Model, EditableDb):
         return db.session.query(cls.query.filter_by(recipe_id=recipe_id, user_id=user_id).exists()).scalar()
 
     @classmethod
-    def get_count_for_user(cls, user_id: int) -> int:
+    def get_count_for_user(cls, user_id: int, public_only: bool = True) -> int:
+        if (public_only):
+            return cls.query.filter_by(user_id=user_id, is_public=True).count()
         return cls.query.filter_by(user_id=user_id).count()
 
 

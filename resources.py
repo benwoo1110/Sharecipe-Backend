@@ -266,7 +266,7 @@ class UserFollows(Resource):
     @check_user_exists
     @get_user_follows
     def get(self, user_id: int, user_follows: typing.List[UserFollow]):
-        user_ids = set(follow.user_id for follow in user_follows)
+        user_ids = set(follow.follow_id for follow in user_follows)
         users = User.get_all_of_ids(user_ids)
         return make_response(jsonify(users), 200)
 

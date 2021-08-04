@@ -38,7 +38,7 @@ users_parser.add_arg('user_ids', required=False, ctype=list)
 
 user_parser = JsonParser()
 user_parser.add_arg('username')
-user_parser.add_arg('bio')
+user_parser.add_arg('bio', required=False)
 
 
 user_follows_parser = JsonParser()

@@ -601,12 +601,11 @@ class Discover(Resource):
     @get_account_user_id
     def get(self, account_id: int):
         discovers = []
-        discovers.append(DiscoverSection(header="Latest", size="large", recipes=Recipe.get_all_public('', 5)))
 
         tag_names = RecipeTag.get_top_of(20)
         random.shuffle(tag_names)
-        if len(tag_names) > 5:
-            tag_names = tag_names[:5]
+        if len(tag_names) > 8:
+            tag_names = tag_names[:8]
 
         for name, in tag_names:
             recipe_ids = [int(tag.recipe_id) for tag in RecipeTag.get_for_name(name)]
@@ -614,17 +613,21 @@ class Discover(Resource):
             discovers.append(DiscoverSection(header=name, size="normal", recipes=recipes))
 
         follows: typing.List[UserFollow] = UserFollow.get_for_user_id(account_id)
-        if len(follows) > 5:
-            follows = follows[:5]
+        random.shuffle(follows)
+        if len(follows) > 8:
+            follows = follows[:8]
 
         for follow in follows:
             user: User = User.get_by_id(follow.follow_id)
-            discovers.append(DiscoverSection(
-                header="Made by " + user.username, 
-                size="normal", 
-                recipes=Recipe.get_for_user_id(follow.follow_id)
-            ))
+            recipes = Recipe.get_for_user_id(follow.follow_id)
+            if recipes:
+                discovers.append(DiscoverSection(
+                    header="Made by " + user.username, 
+                    size="normal", 
+                    recipes=recipes
+                ))
 
         random.shuffle(discovers)
+        discovers.insert(0, DiscoverSection(header="Latest", size="large", recipes=Recipe.get_all_public('', 5)))
 
         return make_response(jsonify(sections=discovers), 200)
